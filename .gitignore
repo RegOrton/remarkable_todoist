@@ -1,0 +1,39 @@
+# Build directories
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# IDE files
+.idea/
+*.user
+.vscode/
+*.swp
+*.swo
+*~
+
+# Config files with tokens
+~/.config/remarkable-todoist/
+
+# Qt generated files
+moc_*
+ui_*
+qrc_*
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Executables
+remarkable-todoist
+*.exe
+*.app
+
+# OS files
+.DS_Store
+Thumbs.db
