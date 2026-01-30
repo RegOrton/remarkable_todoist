@@ -15,7 +15,7 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 
 **Goal:** User can view all their Todoist tasks on the reMarkable 2
 
-**Status:** Pending
+**Status:** Planning Complete
 
 **Dependencies:** None (foundation phase)
 
@@ -36,7 +36,13 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 4. Task list displays correctly on e-ink screen with high contrast and no ghosting
 5. User can scroll through task list using stylus with proper touch targets
 
-**Plans:** 0 planned, 0 completed
+**Plans:** 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Project foundation: CMake build, Task model, Settings module
+- [ ] 01-02-PLAN.md — Todoist API client with error handling
+- [ ] 01-03-PLAN.md — Task list UI: TaskListView and TaskDelegate
+- [ ] 01-04-PLAN.md — Integration and visual verification
 
 ---
 
@@ -93,7 +99,7 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 
 | Phase | Status | Plans | Requirements | Completion |
 |-------|--------|-------|--------------|------------|
-| 1 - Foundation & Task Display | Pending | 0/0 | 8 | 0% |
+| 1 - Foundation & Task Display | Planning Complete | 0/4 | 8 | 0% |
 | 2 - Sync & Task Completion | Pending | 0/0 | 4 | 0% |
 | 3 - Task Creation | Pending | 0/0 | 3 | 0% |
 
@@ -106,6 +112,7 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 | Date | Version | Changes |
 |------|---------|---------|
 | 2026-01-29 | 1.0 | Initial roadmap created with 3 phases covering all 15 v1 requirements |
+| 2026-01-30 | 1.1 | Phase 1 planning complete: 4 plans in 3 waves |
 
 ---
 
