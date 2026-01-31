@@ -73,6 +73,9 @@
 | Priority display inverts API values | API 4 (highest) -> P1, API 1 (lowest) -> P4 for user-friendly display | 01-01 | 2026-01-31 |
 | QSettings static class pattern | No instances needed, simpler API for settings access | 01-01 | 2026-01-31 |
 | Config at ~/.config/remarkable-todoist/ | Standard QSettings UserScope with 0600 permissions for security | 01-01 | 2026-01-31 |
+| 30 second request timeout | Handle slow/unreliable WiFi on reMarkable device | 01-02 | 2026-01-31 |
+| Project name caching in QMap | Populate task.projectName efficiently before emitting tasksFetched | 01-02 | 2026-01-31 |
+| User-friendly error messages | "Invalid API token" instead of "401 Unauthorized" for better UX | 01-02 | 2026-01-31 |
 | 48x48 checkbox touch targets | Meets WCAG guidelines for stylus/touch input | 01-03 | 2026-01-31 |
 | Full e-ink refresh every 5 partials | Prevents ghosting while maintaining responsiveness | 01-03 | 2026-01-31 |
 | 80px row height for task list | Accommodates two-line layout (title + metadata) with spacing | 01-03 | 2026-01-31 |
