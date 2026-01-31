@@ -15,6 +15,8 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
 # Collect all source files
 set(SOURCES
     src/main.cpp
+    src/models/task.cpp
+    src/models/taskmodel.cpp
 )
 
 # Create executable
