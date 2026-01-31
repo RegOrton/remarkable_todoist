@@ -20,6 +20,7 @@ set(SOURCES
     src/config/settings.cpp
     src/network/todoist_client.cpp
     src/views/taskdelegate.cpp
+    src/views/tasklistview.cpp
 )
 
 # Create executable
