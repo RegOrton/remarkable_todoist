@@ -9,28 +9,35 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-# Find Qt5 components
-find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
+# Find Qt6 with Quick/QML for reMarkable 3.x
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2)
+set(QT_VERSION_MAJOR 6)
+message(STATUS "Using Qt6 Quick/QML")
 
-# Collect all source files
+# Collect source files (no widget views)
 set(SOURCES
     src/main.cpp
     src/models/task.cpp
     src/models/taskmodel.cpp
     src/config/settings.cpp
     src/network/todoist_client.cpp
-    src/views/taskdelegate.cpp
-    src/views/tasklistview.cpp
     src/controllers/appcontroller.cpp
 )
 
+# QML resources
+qt_add_resources(QML_RESOURCES qml/qml.qrc)
+
 # Create executable
-add_executable(remarkable-todoist ${SOURCES})
+add_executable(remarkable-todoist ${SOURCES} ${QML_RESOURCES})
 
 # Link Qt libraries
 target_link_libraries(remarkable-todoist
-    Qt5::Widgets
-    Qt5::Network
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Network
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
 )
 
 # Set output directory

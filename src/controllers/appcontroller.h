@@ -2,32 +2,28 @@
 #define APPCONTROLLER_H
 
 #include <QObject>
-#include <QWidget>
-#include <QLabel>
-#include <QVBoxLayout>
 #include <QMap>
 #include <QVector>
 #include "../models/task.h"
 
 class TodoistClient;
 class TaskModel;
-class TaskListView;
 
 /**
- * AppController - Orchestrates the application components
+ * AppController - Orchestrates the application components for QML
  *
- * Mediates between TodoistClient, TaskModel, and TaskListView.
- * Handles the startup flow:
- * 1. Check for API token
- * 2. Fetch projects (for name lookup)
- * 3. Fetch tasks
- * 4. Populate model and display list
+ * Exposes properties and methods for QML to bind to:
+ * - loading: whether tasks are being fetched
+ * - errorMessage: error to display (empty if no error)
+ * - refresh(): trigger a task refresh
  *
- * Also handles error display and refresh requests.
+ * Also provides access to TaskModel for the QML ListView.
  */
 class AppController : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
+    Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
 
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -40,16 +36,24 @@ public:
     void initialize();
 
     /**
-     * Get the main window widget
-     * The returned widget should be shown and managed by the caller
+     * Get the TaskModel for QML binding
      */
-    QWidget* mainWidget();
+    TaskModel* taskModel() const { return m_taskModel; }
 
+    // Property accessors
+    bool loading() const { return m_loading; }
+    QString errorMessage() const { return m_errorMessage; }
+
+public slots:
     /**
      * Refresh the task list
      * Fetches projects then tasks from Todoist API
      */
     void refresh();
+
+signals:
+    void loadingChanged();
+    void errorMessageChanged();
 
 private slots:
     void onProjectsFetched(const QMap<QString, QString>& projects);
@@ -57,19 +61,12 @@ private slots:
     void onError(const QString& error);
 
 private:
-    void showLoading();
-    void showError(const QString& message);
-    void showTaskList();
-    void createNoTokenMessage();
+    void setLoading(bool loading);
+    void setErrorMessage(const QString& message);
 
-    // Main window container
-    QWidget* m_mainWidget;
-    QVBoxLayout* m_layout;
-
-    // UI components
-    TaskListView* m_taskListView;
-    QLabel* m_loadingLabel;
-    QLabel* m_errorLabel;
+    // State
+    bool m_loading;
+    QString m_errorMessage;
 
     // Data layer
     TaskModel* m_taskModel;

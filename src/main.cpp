@@ -1,27 +1,42 @@
-#include <QApplication>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QQuickStyle>
+
 #include "controllers/appcontroller.h"
+#include "models/taskmodel.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
     // Set application identity (for QSettings)
-    QApplication::setOrganizationName("remarkable-todoist");
-    QApplication::setApplicationName("Remarkable Todoist");
+    QGuiApplication::setOrganizationName("remarkable-todoist");
+    QGuiApplication::setApplicationName("Remarkable Todoist");
 
-    // Create and initialize controller
+    // Use Basic style (simplest, good for e-ink)
+    QQuickStyle::setStyle("Basic");
+
+    // Create controller and initialize
     AppController controller;
+
+    // Set up QML engine
+    QQmlApplicationEngine engine;
+
+    // Expose controller and model to QML
+    engine.rootContext()->setContextProperty("appController", &controller);
+    engine.rootContext()->setContextProperty("taskModel", controller.taskModel());
+
+    // Load QML
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+    if (engine.rootObjects().isEmpty()) {
+        qCritical() << "Failed to load QML";
+        return -1;
+    }
+
+    // Initialize after QML is loaded (starts fetching data)
     controller.initialize();
-
-    // Get main widget and configure window
-    QWidget* mainWindow = controller.mainWidget();
-    mainWindow->setWindowTitle("Remarkable Todoist");
-
-    // Set window size appropriate for reMarkable 2 (1404x1872 portrait)
-    // For development, use smaller window; on device will be fullscreen
-    mainWindow->resize(700, 900);
-
-    mainWindow->show();
 
     return app.exec();
 }

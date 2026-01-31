@@ -10,10 +10,12 @@
 | Technology | Version | Purpose | Why | Confidence |
 |------------|---------|---------|-----|------------|
 | **C++** | C++17 | Primary language | Native performance on ARM, direct framebuffer access, low memory footprint essential for 1GB RAM device | HIGH |
-| **Qt Framework** | Qt 5.15 | GUI framework | Pre-installed on device, official support, excellent networking (QNetworkAccessManager) and JSON (QJsonDocument) built-in | HIGH |
+| **Qt Framework** | **Qt 6 (Quick/QML)** | GUI framework | **UPDATE 2026-01-31:** reMarkable 3.x uses Qt6 with Quick/QML, NOT Qt5 Widgets. Must use QML for UI. | HIGH |
 | **rmKit** | Latest via Toltec | Alternative UI framework | AVOID for this project - requires custom framebuffer handling, adds complexity. Use Qt since it's pre-installed | MEDIUM |
 
 **Rationale for Qt over rmKit:** Qt comes pre-installed on reMarkable 2 and provides battle-tested networking, JSON parsing, and event handling. rmKit is a single-header framework good for simple apps, but Qt's mature HTTP client and JSON APIs make Todoist integration straightforward. The added "framework weight" is irrelevant since Qt is already on the device.
+
+**IMPORTANT UPDATE (2026-01-31):** Original research indicated Qt 5.15 Widgets. During integration testing, discovered reMarkable 3.x firmware actually uses **Qt6 with Qt Quick/QML**. The UI must be built with QML, not C++ widgets. This was validated by the actual device/toolchain requirements.
 
 ### Display System
 | Technology | Version | Purpose | Why | Confidence |
@@ -84,21 +86,27 @@
 ### Build System & Toolchain
 | Technology | Version | Purpose | Why | Confidence |
 |------------|---------|---------|-----|------------|
-| **CMake** | 3.16+ | Build system | Standard for Qt projects, cross-platform, toltecmk supports CMake | HIGH |
-| **Toltec Docker Toolchain** | Latest | Cross-compilation | Official Docker images with GCC cross-compiler for ARMv7, includes Qt 5.15 headers | HIGH |
-| **qmake** | Qt 5.15 | Alternative build system | AVOID - CMake is more flexible and better documented for cross-compilation | MEDIUM |
+| **CMake** | 3.16+ | Build system | Standard for Qt projects, cross-platform | HIGH |
+| **Official reMarkable SDK** | v3.1.15 | Cross-compilation | **UPDATED:** Use official SDK from remarkable.engineering for Qt6 support | HIGH |
+| **Toltec Docker Toolchain** | Latest | Alternative | For Qt5/Widgets apps. Does NOT have Qt6 - avoid for this project | MEDIUM |
+| **qmake** | N/A | Alternative build system | AVOID - CMake is more flexible and better documented for cross-compilation | MEDIUM |
 
-**Docker image:** `ghcr.io/toltec-dev/toolchain:latest`
-
-**Build process:**
+**Official SDK (RECOMMENDED for Qt6):**
 ```bash
-docker pull ghcr.io/toltec-dev/toolchain:latest
-docker run -it -v $(pwd):/project toltec-toolchain
-cd /project
-mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/toolchain.cmake
-make
+# Download and install official toolchain
+wget https://remarkable.engineering/oecore-x86_64-cortexa7hf-neon-rm11x-toolchain-3.1.15.sh
+chmod +x oecore-x86_64-cortexa7hf-neon-rm11x-toolchain-3.1.15.sh
+./oecore-x86_64-cortexa7hf-neon-rm11x-toolchain-3.1.15.sh -d ~/remarkable-toolchain
+
+# Use toolchain
+source ~/remarkable-toolchain/environment-setup-cortexa7hf-neon-remarkable-linux-gnueabi
+cmake -B build-rm -DCMAKE_TOOLCHAIN_FILE=cmake/remarkable.cmake
+cmake --build build-rm
 ```
+
+**CMake toolchain file (cmake/remarkable.cmake):**
+- Uses environment variables from SDK: `$CC`, `$CXX`, `$SDKTARGETSYSROOT`
+- ARM flags: `-march=armv7-a -mfpu=neon -mfloat-abi=hard` for Cortex-A7
 
 **For Toltec packaging:** Use `toltecmk` tool to create .ipk package from recipe.
 
@@ -154,8 +162,8 @@ pip install toltecmk
 
 ### Build Dependencies (in Docker)
 ```cmake
-# CMakeLists.txt
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
+# CMakeLists.txt (UPDATED 2026-01-31 for Qt6 Quick)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2)
 ```
 
 ## Version Constraints & Compatibility
@@ -166,11 +174,11 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 - **CRITICAL:** OS 3.4+ has limited Toltec support. Check toltec-dev/toltec#859 for status.
 
 ### Qt Version Constraints
-- **Qt 5.15** is pre-installed on device
+- **~~Qt 5.15~~** **Qt 6** is used on reMarkable 3.x firmware
 - **DO NOT** install Qt via Toltec - conflicts with system Qt
-- **Use system Qt** only: cross-compile against reMarkable's Qt 5.15
-- **NO Qt Widgets support** in official SDK, only Qt Quick (QML)
-  - **CONTRADICTION:** Community reports Qt Widgets work fine. Verify early.
+- **Use system Qt** only: cross-compile against reMarkable's Qt 6
+- **Qt Quick/QML ONLY** - Qt Widgets do NOT work. This was **VERIFIED 2026-01-31**.
+  - Original contradiction resolved: Community may have been using older firmware. 3.x requires QML.
 
 ### Known Compatibility Issues
 | Issue | Impact | Mitigation |
@@ -178,7 +186,7 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 | OS 3.4+ Toltec support incomplete | App may not install on latest OS | Warn users to check OS version, track toltec-dev/toltec#859 |
 | rm2fb missing on rM2 | App won't display, soft-brick | Make `display` package a mandatory dependency in package recipe |
 | OpenSSL version mismatch | HTTPS fails | Dynamically link OpenSSL, rely on system version |
-| Qt Widgets vs Qt Quick | API differences | Community says Widgets work - prototype early to verify |
+| Qt Widgets vs Qt Quick | API differences | **RESOLVED:** Must use Qt Quick/QML. Widgets do NOT work on rM 3.x. |
 | MyScript API rate limits | Handwriting conversion fails | Defer handwriting to v2, not MVP blocker |
 
 ## Performance Considerations
@@ -237,7 +245,7 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 ## Open Questions & Risks
 
 ### Needs Early Validation
-1. **Qt Widgets vs Qt Quick:** Documentation says "Qt Quick only" but community uses Widgets. Build hello-world early to verify.
+1. **~~Qt Widgets vs Qt Quick:~~** **RESOLVED 2026-01-31:** reMarkable 3.x firmware uses **Qt6 with Qt Quick/QML**. Qt Widgets do NOT work - must use Qt Quick. Discovered during 01-04 integration. Refactored entire UI to QML.
 2. **OpenSSL availability:** Assume system has OpenSSL but verify with `QSslSocket::supportsSsl()` at runtime.
 3. **rm2fb installation:** Is it automatic dependency or user must install manually? Check toltecmk dependency handling.
 4. **Task list size:** Performance at 1000+ tasks unknown. Load test with large JSON response.

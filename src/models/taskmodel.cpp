@@ -22,14 +22,16 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
     const Task &task = m_tasks[index.row()];
 
     switch (role) {
+        case IdRole:
+            return task.id;
         case TitleRole:
             return task.title;
         case DueDateRole:
             return task.dueDateDisplay();
-        case ProjectRole:
+        case ProjectNameRole:
             return task.projectName;
         case PriorityRole:
-            return task.priorityLabel();
+            return task.priority;  // Return numeric priority for QML
         case CompletedRole:
             return task.completed;
         case Qt::DisplayRole:
@@ -42,9 +44,10 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> TaskModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles[IdRole] = "id";
     roles[TitleRole] = "title";
     roles[DueDateRole] = "dueDate";
-    roles[ProjectRole] = "project";
+    roles[ProjectNameRole] = "projectName";
     roles[PriorityRole] = "priority";
     roles[CompletedRole] = "completed";
     return roles;

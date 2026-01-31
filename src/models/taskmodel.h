@@ -11,9 +11,10 @@ class TaskModel : public QAbstractListModel
 
 public:
     enum TaskRoles {
-        TitleRole = Qt::UserRole + 1,
+        IdRole = Qt::UserRole + 1,
+        TitleRole,
         DueDateRole,
-        ProjectRole,
+        ProjectNameRole,
         PriorityRole,
         CompletedRole
     };
