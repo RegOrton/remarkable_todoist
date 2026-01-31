@@ -18,6 +18,7 @@ set(SOURCES
     src/models/task.cpp
     src/models/taskmodel.cpp
     src/config/settings.cpp
+    src/network/todoist_client.cpp
     src/views/taskdelegate.cpp
 )
 
