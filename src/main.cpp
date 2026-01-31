@@ -1,44 +1,27 @@
 #include <QApplication>
-#include <QLabel>
-#include <QDebug>
-
-#include "models/taskmodel.h"
-#include "config/settings.h"
+#include "controllers/appcontroller.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    // Set application metadata
-    QCoreApplication::setApplicationName("remarkable-todoist");
-    QCoreApplication::setOrganizationName("remarkable-todoist");
+    // Set application identity (for QSettings)
+    QApplication::setOrganizationName("remarkable-todoist");
+    QApplication::setApplicationName("Remarkable Todoist");
 
-    // Verify TaskModel works
-    TaskModel model;
-    Q_ASSERT(model.rowCount() == 0);
-    QVector<Task> emptyTasks;
-    model.setTasks(emptyTasks);
-    Q_ASSERT(model.rowCount() == 0);
-    qDebug() << "TaskModel verification passed: rowCount =" << model.rowCount();
+    // Create and initialize controller
+    AppController controller;
+    controller.initialize();
 
-    // Verify Settings works
-    qDebug() << "Config file path:" << AppSettings::configFilePath();
-    qDebug() << "Has API token:" << AppSettings::hasApiToken();
+    // Get main widget and configure window
+    QWidget* mainWindow = controller.mainWidget();
+    mainWindow->setWindowTitle("Remarkable Todoist");
 
-    // Create placeholder window showing verification status
-    QString status = QString("Hello reMarkable\n\n"
-                            "TaskModel: OK\n"
-                            "Settings: OK\n"
-                            "Config: %1\n"
-                            "Token configured: %2")
-                        .arg(AppSettings::configFilePath())
-                        .arg(AppSettings::hasApiToken() ? "Yes" : "No");
+    // Set window size appropriate for reMarkable 2 (1404x1872 portrait)
+    // For development, use smaller window; on device will be fullscreen
+    mainWindow->resize(700, 900);
 
-    QLabel *label = new QLabel(status);
-    label->setWindowTitle("Remarkable Todoist");
-    label->setAlignment(Qt::AlignCenter);
-    label->resize(500, 350);
-    label->show();
+    mainWindow->show();
 
     return app.exec();
 }
