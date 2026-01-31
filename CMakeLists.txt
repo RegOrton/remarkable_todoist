@@ -17,6 +17,7 @@ set(SOURCES
     src/main.cpp
     src/models/task.cpp
     src/models/taskmodel.cpp
+    src/config/settings.cpp
 )
 
 # Create executable
