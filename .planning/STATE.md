@@ -1,8 +1,8 @@
 # Project State: Remarkable Todoist
 
-**Last Updated:** 2026-01-29
+**Last Updated:** 2026-01-31
 **Phase:** 1 - Foundation & Task Display
-**Status:** Planning
+**Status:** In Progress
 
 ---
 
@@ -22,16 +22,18 @@
 
 ## Current Position
 
-**Phase:** 1 - Foundation & Task Display
-**Plan:** None (awaiting planning)
-**Status:** Planning
-**Progress:** [░░░░░░░░░░░░░░░░░░░░] 0% (0/15 requirements delivered)
+**Phase:** 1 of 3 (Foundation & Task Display)
+**Plan:** 1 of 4 complete
+**Status:** In progress
+**Last activity:** 2026-01-31 - Completed 01-01-PLAN.md
+
+**Progress:** [█████░░░░░░░░░░░░░░░] 7% (1/15 plans delivered)
 
 **Phase Goal:** User can view all their Todoist tasks on the reMarkable 2
 
 **Active Requirements:** AUTH-01, AUTH-02, DISP-01, DISP-02, DISP-03, DISP-04, DISP-05, DISP-06
 
-**Next Milestone:** Complete Phase 1 planning
+**Next Milestone:** Complete 01-02-PLAN.md (Todoist API client)
 
 ---
 
@@ -40,22 +42,22 @@
 **Requirements:**
 - Total v1: 15
 - Completed: 0
-- In Progress: 0
-- Pending: 15
+- In Progress: 8 (Phase 1)
+- Pending: 7
 
 **Phases:**
 - Total: 3
 - Completed: 0
+- In Progress: 1
+- Pending: 2
+
+**Plans:**
+- Total: 4 (Phase 1)
+- Completed: 1
 - In Progress: 0
 - Pending: 3
 
-**Plans:**
-- Total: 0
-- Completed: 0
-- In Progress: 0
-- Pending: 0
-
-**Velocity:** N/A (no completed work yet)
+**Velocity:** 16 min/plan (1 data point)
 
 ---
 
@@ -65,9 +67,12 @@
 
 | Decision | Rationale | Phase | Date |
 |----------|-----------|-------|------|
-| Three-phase structure for quick depth | Requirements naturally group into display → sync → creation, follows dependencies | Roadmap | 2026-01-29 |
+| Three-phase structure for quick depth | Requirements naturally group into display -> sync -> creation, follows dependencies | Roadmap | 2026-01-29 |
 | Include handwriting in v1 | TASK-02 is v1 requirement despite complexity | Roadmap | 2026-01-29 |
 | Combine foundation with display in Phase 1 | Delivers visible progress early, validates e-ink constraints before adding complexity | Roadmap | 2026-01-29 |
+| Priority display inverts API values | API 4 (highest) -> P1, API 1 (lowest) -> P4 for user-friendly display | 01-01 | 2026-01-31 |
+| QSettings static class pattern | No instances needed, simpler API for settings access | 01-01 | 2026-01-31 |
+| Config at ~/.config/remarkable-todoist/ | Standard QSettings UserScope with 0600 permissions for security | 01-01 | 2026-01-31 |
 
 ### Open Questions
 
@@ -79,30 +84,37 @@
 
 ### Current Blockers
 
-None (project in planning stage)
+None
 
 ### Active TODOs
 
-- [ ] Create Phase 1 plan (next step: `/gsd:plan-phase 1`)
+- [ ] Execute 01-02-PLAN.md (Todoist API client with error handling)
+- [ ] Execute 01-03-PLAN.md (Task list UI: TaskListView and TaskDelegate)
+- [ ] Execute 01-04-PLAN.md (Integration and visual verification)
 
 ---
 
 ## Session Continuity
 
-**Last Session:** 2026-01-29 - Roadmap creation
-**Next Session Starts Here:** Planning Phase 1
+**Last Session:** 2026-01-31 - Completed 01-01-PLAN.md
+**Stopped at:** Completed 01-01-PLAN.md (Project foundation)
+**Resume file:** None
 
 **Quick Context for Next Session:**
-- Roadmap created with 3 phases (quick depth)
-- All 15 v1 requirements mapped to phases
-- Phase 1 covers foundation + display (8 requirements)
-- Research suggests Qt 5.15 with C++, rm2fb for framebuffer, offline-first architecture
-- Ready to plan Phase 1 implementation details
+- Plan 01-01 complete: Qt 5.15 project, Task model, TaskModel, AppSettings
+- Project builds successfully with cmake
+- Directory structure established: src/models/, src/config/, src/views/, src/controllers/, src/network/
+- Ready to implement Todoist API client (01-02-PLAN.md)
 
 **Files Modified This Session:**
-- .planning/ROADMAP.md (created)
-- .planning/STATE.md (created)
-- .planning/REQUIREMENTS.md (traceability update pending)
+- CMakeLists.txt (created/updated)
+- .gitignore (created)
+- src/main.cpp (created)
+- src/models/task.h, task.cpp (created)
+- src/models/taskmodel.h, taskmodel.cpp (created)
+- src/config/settings.h, settings.cpp (created)
+- .planning/phases/01-foundation-task-display/01-01-SUMMARY.md (created)
+- .planning/STATE.md (updated)
 
 ---
 
