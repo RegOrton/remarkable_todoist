@@ -95,9 +95,9 @@
 | **Stock firmware (no Toltec)** | Toltec not supported on current reMarkable OS version | Deploy | 2026-02-01 |
 | **Launcher notebook for app launch** | No app launcher on stock firmware; use inotifywait to detect notebook open, switch to app | Deploy | 2026-02-01 |
 | Oxide integration as fallback | If user has Toltec/Oxide, can use standard launcher metadata at /opt/etc/draft/ | Deploy | 2026-02-01 |
-| Immediate queue persistence | Save to JSON on every enqueue/dequeue for crash safety | 02-02 | 2026-02-02 |
-| QStandardPaths for queue storage | Use AppDataLocation instead of hardcoded ~/.local/share | 02-02 | 2026-02-02 |
-| QVector for queue implementation | Simple, adequate performance for small queues (<10 items typically) | 02-02 | 2026-02-02 |
+| POST with empty QByteArray | Qt requires empty body for bodyless POST; Todoist /close returns 204 No Content | 02-01 | 2026-02-02 |
+| Linear scan in setTaskCompleted | Task list is small (<100 items), no need for hash map | 02-01 | 2026-02-02 |
+| dataChanged with specific role | Emit {CompletedRole} for minimal QML update instead of all roles | 02-01 | 2026-02-02 |
 
 ### Open Questions
 
@@ -125,8 +125,8 @@ None
 
 ## Session Continuity
 
-**Last Session:** 2026-02-02 - Phase 2 Plan 02 execution
-**Stopped at:** Completed 02-02-PLAN.md (SyncQueue with JSON persistence)
+**Last Session:** 2026-02-02 - Phase 2 Plan 01 execution
+**Stopped at:** Completed 02-01-PLAN.md (Task completion building blocks)
 **Resume file:** None
 
 **Quick Context for Next Session:**
@@ -135,21 +135,17 @@ None
 - **Deployment:** Two options implemented:
   1. `launcher/` - Notebook-based launcher for stock firmware (inotifywait watches for "Launch Todoist" notebook)
   2. `oxide/` - Standard Oxide integration for Toltec users
-- **Key learnings:**
-  - Toltec not supported on current reMarkable OS version
-  - Cross-compilation toolchain lacks Qt6 Quick/QML libraries
-  - Stock firmware has no app launcher - must stop xochitl to run custom apps
-  - Launcher notebook pattern: systemd service + inotifywait + notebook trigger
 
 **Phase 2 Progress:**
-- ✓ 02-02 - SyncQueue with JSON persistence
-  - Crash-safe operation queue at ~/.local/share/remarkable-todoist/sync_queue.json
-  - UUID-based idempotency for sync operations
-  - QStandardPaths for cross-platform data directory
+- ✓ 02-01 - Task completion building blocks
+  - TodoistClient.closeTask() - POST to /tasks/{id}/close with 204 No Content
+  - TaskModel.setTaskCompleted() - State update with dataChanged signal
+  - Both methods follow established patterns from Phase 1
 
 **Next Steps:**
-- Execute 02-03-PLAN.md - SyncManager implementation
-- Execute 02-04-PLAN.md - Integration with UI
+- Execute 02-02-PLAN.md - SyncQueue implementation with JSON persistence
+- Execute 02-03-PLAN.md - SyncManager orchestration
+- Execute 02-04-PLAN.md - UI integration and visual verification
 - Test offline task completion on device
 
 ---
