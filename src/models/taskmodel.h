@@ -30,6 +30,7 @@ public:
     void setTasks(const QVector<Task> &tasks);
     const Task& taskAt(int row) const;
     int taskCount() const;
+    void setTaskCompleted(const QString& taskId, bool completed);
 
 private:
     QVector<Task> m_tasks;

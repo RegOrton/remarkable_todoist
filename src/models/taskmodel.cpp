@@ -69,3 +69,27 @@ int TaskModel::taskCount() const
 {
     return m_tasks.size();
 }
+
+void TaskModel::setTaskCompleted(const QString& taskId, bool completed)
+{
+    // Find task by ID in m_tasks vector
+    for (int i = 0; i < m_tasks.size(); ++i) {
+        if (m_tasks[i].id == taskId) {
+            // Check if state actually changed
+            if (m_tasks[i].completed == completed) {
+                return;  // No change needed
+            }
+
+            // Update task state
+            m_tasks[i].completed = completed;
+
+            // Notify QML that this specific row's CompletedRole changed
+            QModelIndex idx = index(i, 0);
+            emit dataChanged(idx, idx, {CompletedRole});
+            return;
+        }
+    }
+
+    // Task not found - this is OK (might have been deleted elsewhere)
+    qDebug() << "setTaskCompleted: Task" << taskId << "not found in model";
+}
