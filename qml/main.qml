@@ -47,12 +47,14 @@ ApplicationWindow {
                         width: 16
                         height: 16
                         radius: 8
-                        color: appController.syncManager.isOnline ? "#4CAF50" : "#F44336"
+                        color: appController.syncManager ? (appController.syncManager.isOnline ? "#4CAF50" : "#F44336") : "#888888"
                     }
 
                     Text {
                         text: {
-                            if (!appController.syncManager.isOnline) {
+                            if (!appController.syncManager) {
+                                return "..."
+                            } else if (!appController.syncManager.isOnline) {
                                 return "Offline"
                             } else if (appController.syncManager.pendingCount > 0) {
                                 return "Syncing " + appController.syncManager.pendingCount + "..."
