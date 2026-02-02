@@ -50,7 +50,7 @@ Plans:
 
 **Goal:** User can refresh task list and check off completed tasks
 
-**Status:** Planning Complete
+**Status:** Complete
 
 **Dependencies:** Phase 1 (requires task display and auth foundation)
 
@@ -70,10 +70,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — TodoistClient closeTask() and TaskModel setTaskCompleted()
-- [ ] 02-02-PLAN.md — SyncQueue with JSON persistence
-- [ ] 02-03-PLAN.md — SyncManager for connectivity and queue orchestration
-- [ ] 02-04-PLAN.md — Integration and visual verification
+- [x] 02-01-PLAN.md — TodoistClient closeTask() and TaskModel setTaskCompleted()
+- [x] 02-02-PLAN.md — SyncQueue with JSON persistence
+- [x] 02-03-PLAN.md — SyncManager for connectivity and queue orchestration
+- [x] 02-04-PLAN.md — Integration and visual verification
 
 ---
 
@@ -106,10 +106,10 @@ Plans:
 | Phase | Status | Plans | Requirements | Completion |
 |-------|--------|-------|--------------|------------|
 | 1 - Foundation & Task Display | Complete | 4/4 | 8 | 100% |
-| 2 - Sync & Task Completion | Planning Complete | 0/4 | 4 | 0% |
+| 2 - Sync & Task Completion | Complete | 4/4 | 4 | 100% |
 | 3 - Task Creation | Pending | 0/0 | 3 | 0% |
 
-**Overall:** 53% complete (8/15 requirements delivered)
+**Overall:** 80% complete (12/15 requirements delivered)
 
 ---
 
@@ -121,6 +121,7 @@ Plans:
 | 2026-01-30 | 1.1 | Phase 1 planning complete: 4 plans in 3 waves |
 | 2026-02-01 | 1.2 | Phase 1 complete: App displays Todoist tasks on reMarkable |
 | 2026-02-02 | 1.3 | Phase 2 planning complete: 4 plans in 3 waves |
+| 2026-02-02 | 1.4 | Phase 2 complete: Task completion with offline sync |
 
 ---
 

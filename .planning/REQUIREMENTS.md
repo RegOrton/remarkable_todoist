@@ -7,24 +7,24 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: Store API token in plaintext config file on device
-- [ ] **AUTH-02**: Load token on app startup
+- [x] **AUTH-01**: Store API token in plaintext config file on device
+- [x] **AUTH-02**: Load token on app startup
 
 ### Task Display
 
-- [ ] **DISP-01**: Show all tasks in scrollable list
-- [ ] **DISP-02**: Display task name for each task
-- [ ] **DISP-03**: Display due date for each task
-- [ ] **DISP-04**: Display project name for each task
-- [ ] **DISP-05**: Display priority indicator (P1-P4) for each task
-- [ ] **DISP-06**: Checkbox next to each task to mark complete
+- [x] **DISP-01**: Show all tasks in scrollable list
+- [x] **DISP-02**: Display task name for each task
+- [x] **DISP-03**: Display due date for each task
+- [x] **DISP-04**: Display project name for each task
+- [x] **DISP-05**: Display priority indicator (P1-P4) for each task
+- [x] **DISP-06**: Checkbox next to each task to mark complete
 
 ### Sync
 
-- [ ] **SYNC-01**: Manual refresh button pulls latest tasks from Todoist
-- [ ] **SYNC-02**: Offline queue stores pending changes when no WiFi
-- [ ] **SYNC-03**: Sync queued changes when connection restored
-- [ ] **SYNC-04**: Show sync status indicator in UI
+- [x] **SYNC-01**: Manual refresh button pulls latest tasks from Todoist
+- [x] **SYNC-02**: Offline queue stores pending changes when no WiFi
+- [x] **SYNC-03**: Sync queued changes when connection restored
+- [x] **SYNC-04**: Show sync status indicator in UI
 
 ### Task Creation
 
@@ -67,18 +67,18 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| DISP-01 | Phase 1 | Pending |
-| DISP-02 | Phase 1 | Pending |
-| DISP-03 | Phase 1 | Pending |
-| DISP-04 | Phase 1 | Pending |
-| DISP-05 | Phase 1 | Pending |
-| DISP-06 | Phase 1 | Pending |
-| SYNC-01 | Phase 2 | Pending |
-| SYNC-02 | Phase 2 | Pending |
-| SYNC-03 | Phase 2 | Pending |
-| SYNC-04 | Phase 2 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| DISP-01 | Phase 1 | Complete |
+| DISP-02 | Phase 1 | Complete |
+| DISP-03 | Phase 1 | Complete |
+| DISP-04 | Phase 1 | Complete |
+| DISP-05 | Phase 1 | Complete |
+| DISP-06 | Phase 1 | Complete |
+| SYNC-01 | Phase 2 | Complete |
+| SYNC-02 | Phase 2 | Complete |
+| SYNC-03 | Phase 2 | Complete |
+| SYNC-04 | Phase 2 | Complete |
 | TASK-01 | Phase 3 | Pending |
 | TASK-02 | Phase 3 | Pending |
 | TASK-03 | Phase 3 | Pending |
@@ -87,7 +87,8 @@
 - v1 requirements: 15 total
 - Mapped to phases: 15
 - Unmapped: 0
+- Complete: 12 (80%)
 
 ---
 *Requirements defined: 2026-01-29*
-*Last updated: 2026-01-29 after roadmap creation*
+*Last updated: 2026-02-02 after Phase 2 completion*
