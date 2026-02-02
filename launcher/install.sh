@@ -13,24 +13,34 @@ echo "Installing Todoist Launcher..."
 
 # Check for inotifywait
 if ! command -v inotifywait &> /dev/null; then
-    echo "Error: inotifywait not found. Installing inotify-tools..."
-    echo "If this fails, you may need to install it manually."
-    # Try opkg if available, otherwise give instructions
+    echo "Error: inotifywait not found."
+    echo ""
     if command -v opkg &> /dev/null; then
+        echo "Installing via opkg..."
         opkg install inotify-tools
     else
-        echo "Please install inotify-tools manually or copy the binary to the device."
+        echo "The launcher notebook feature requires inotify-tools."
+        echo "On stock firmware, you have two options:"
+        echo ""
+        echo "  1. Use manual SSH launch instead (see README.md)"
+        echo "  2. Copy a static inotifywait binary to /usr/bin/"
+        echo ""
+        echo "You can get a static ARM binary from:"
+        echo "  https://github.com/inotify-tools/inotify-tools/releases"
+        echo ""
         exit 1
     fi
 fi
 
-# Copy the main app executable
-if [ -f "$PROJECT_DIR/remarkable-todoist" ]; then
+# Copy the main app executable (from build directory)
+if [ -f "$PROJECT_DIR/build/remarkable-todoist" ]; then
     echo "  Copying app to /opt/bin/..."
-    sudo cp "$PROJECT_DIR/remarkable-todoist" /opt/bin/
+    sudo cp "$PROJECT_DIR/build/remarkable-todoist" /opt/bin/
     sudo chmod +x /opt/bin/remarkable-todoist
 else
-    echo "Warning: remarkable-todoist executable not found. Build it first with 'make'"
+    echo "Error: remarkable-todoist executable not found."
+    echo "Build it first with: mkdir -p build && cd build && cmake .. && make"
+    exit 1
 fi
 
 # Copy the launcher script

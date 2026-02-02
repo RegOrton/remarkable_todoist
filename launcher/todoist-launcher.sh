@@ -38,7 +38,9 @@ watch_for_launch() {
         # Wait a moment for display to be free
         sleep 1
 
-        # Launch Todoist app
+        # Launch Todoist app with e-paper display settings
+        export QT_QPA_PLATFORM=epaper
+        export QT_QUICK_BACKEND=epaper
         $APP_PATH
 
         # App exited, restart Xochitl

@@ -26,10 +26,12 @@ The app is built **on the reMarkable device itself** (cross-compilation from des
 
 ```bash
 cd ~/Remarkable_Todoist
+mkdir -p build && cd build
+cmake ..
 make
 ```
 
-This produces the `remarkable-todoist` executable.
+This produces `build/remarkable-todoist`.
 
 ## Configuration
 

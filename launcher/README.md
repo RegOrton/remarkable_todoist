@@ -13,6 +13,8 @@ Launch Remarkable Todoist by opening a special notebook - no SSH required after 
 1. Build the app on the device:
    ```bash
    cd ~/Remarkable_Todoist
+   mkdir -p build && cd build
+   cmake ..
    make
    ```
 
