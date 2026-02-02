@@ -22,6 +22,7 @@ set(SOURCES
     src/models/sync_queue.cpp
     src/config/settings.cpp
     src/network/todoist_client.cpp
+    src/network/sync_manager.cpp
     src/controllers/appcontroller.cpp
 )
 
