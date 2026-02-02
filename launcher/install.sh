@@ -13,21 +13,25 @@ echo "Installing Todoist Launcher..."
 
 # Check for inotifywait
 if ! command -v inotifywait &> /dev/null; then
-    echo "Error: inotifywait not found."
+    echo "inotifywait not found. Building from source..."
     echo ""
+
     if command -v opkg &> /dev/null; then
-        echo "Installing via opkg..."
+        echo "Toltec detected, installing via opkg..."
         opkg install inotify-tools
     else
-        echo "The launcher notebook feature requires inotify-tools."
-        echo "On stock firmware, you have two options:"
-        echo ""
-        echo "  1. Use manual SSH launch instead (see README.md)"
-        echo "  2. Copy a static inotifywait binary to /usr/bin/"
-        echo ""
-        echo "You can get a static ARM binary from:"
-        echo "  https://github.com/inotify-tools/inotify-tools/releases"
-        echo ""
+        # Build from source on stock firmware
+        if [ -f "$SCRIPT_DIR/../tools/build-inotify-tools.sh" ]; then
+            bash "$SCRIPT_DIR/../tools/build-inotify-tools.sh"
+        else
+            echo "Error: build-inotify-tools.sh not found"
+            exit 1
+        fi
+    fi
+
+    # Verify installation succeeded
+    if ! command -v inotifywait &> /dev/null && ! [ -f /usr/local/bin/inotifywait ]; then
+        echo "Error: Failed to install inotifywait"
         exit 1
     fi
 fi

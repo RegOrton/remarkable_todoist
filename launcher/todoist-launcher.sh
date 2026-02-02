@@ -4,6 +4,9 @@
 # When detected, stops Xochitl and launches the Todoist app
 #
 
+# Add /usr/local/bin to PATH for inotifywait
+export PATH="/usr/local/bin:$PATH"
+
 NOTEBOOK_NAME="Launch Todoist"
 APP_PATH="/opt/bin/remarkable-todoist"
 METADATA_DIR="/home/root/.local/share/remarkable/xochitl"
