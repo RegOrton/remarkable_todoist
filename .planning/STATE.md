@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-02-02
 **Phase:** 2 - Sync & Task Completion
-**Status:** In Progress
+**Status:** Complete
 
 ---
 
@@ -10,7 +10,7 @@
 
 **Core Value:** View and manage Todoist tasks on the reMarkable 2 without needing a phone or computer
 
-**Current Focus:** Enable task completion with sync queue and background sync management
+**Current Focus:** Phase 2 complete - task completion with sync queue and background sync
 
 **Active Constraints:**
 - E-ink display (slow refresh, monochrome, high contrast required)
@@ -23,17 +23,17 @@
 ## Current Position
 
 **Phase:** 2 of 3 (Sync & Task Completion)
-**Plan:** 02-03 complete (3 of 4)
-**Status:** In Progress
-**Last activity:** 2026-02-02 - Completed 02-03-PLAN.md (SyncManager orchestration)
+**Plan:** 02-04 complete (4 of 4)
+**Status:** Phase Complete
+**Last activity:** 2026-02-02 - Completed 02-04-PLAN.md (UI integration and visual verification)
 
-**Progress:** [██████████████░░░░░░] 62% (5/8 plans delivered)
+**Progress:** [████████████████████] 75% (6/8 plans delivered)
 
 **Phase Goal:** User can complete tasks offline with automatic background sync
 
-**Active Requirements:** SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03
+**Active Requirements:** SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03 - ALL COMPLETE
 
-**Next Milestone:** Complete 02-04-PLAN.md - UI integration and visual verification
+**Next Milestone:** Phase 3 - Task Creation with Handwriting Input
 
 ---
 
@@ -41,23 +41,23 @@
 
 **Requirements:**
 - Total v1: 15
-- Completed: 0
-- In Progress: 8 (Phase 1)
-- Pending: 7
+- Completed: 6 (SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03)
+- In Progress: 0
+- Pending: 9 (Phase 3)
 
 **Phases:**
 - Total: 3
-- Completed: 1
-- In Progress: 1
+- Completed: 2
+- In Progress: 0
 - Pending: 1
 
 **Plans:**
 - Total: 8 (across all phases)
-- Completed: 5
+- Completed: 6
 - In Progress: 0
-- Pending: 3
+- Pending: 2
 
-**Velocity:** 6 min/plan (5 data points: 16 + 11 + 3 + 2 + 2 = 34 min / 5 plans)
+**Velocity:** 7 min/plan (6 data points: 16 + 11 + 3 + 2 + 2 + 8 = 42 min / 6 plans)
 
 ---
 
@@ -103,6 +103,9 @@
 | 2 second delay after connectivity restoration | Avoid race conditions when network just came up; gives WiFi/DNS time to stabilize | 02-03 | 2026-02-02 |
 | Dequeue only after server confirms success | Never remove operation on failure; only dequeue after 204 No Content to prevent data loss | 02-03 | 2026-02-02 |
 | Max 5 retry attempts | Balance persistence vs avoiding infinite loops on permanent failures | 02-03 | 2026-02-02 |
+| Full SyncManager include in appcontroller.h | Qt6 metaobject requires complete type for Q_PROPERTY, forward declaration insufficient | 02-04 | 2026-02-02 |
+| Null checks for syncManager in QML | SyncManager created in initialize() after QML loads, bindings need null-safe access | 02-04 | 2026-02-02 |
+| Complete-only, no toggle | Checkbox only completes tasks, doesn't reopen (separate feature) | 02-04 | 2026-02-02 |
 
 ### Open Questions
 
@@ -122,44 +125,52 @@ None
 - [x] Execute 01-02-PLAN.md (Todoist API client with error handling)
 - [x] Execute 01-03-PLAN.md (Task list UI: TaskListView and TaskDelegate) - **obsoleted by Qt6/QML**
 - [x] Execute 01-04-PLAN.md (Integration) - Refactored to Qt6 Quick/QML
-- [ ] Commit Qt6/QML changes (uncommitted from crash)
 - [x] Verify build and test on desktop - **PASSED: 6 projects, 21 tasks fetched**
 - [x] Visual verification checkpoint - **PASSED: Running on reMarkable device**
+- [x] Execute 02-01-PLAN.md (Task completion building blocks)
+- [x] Execute 02-02-PLAN.md (SyncQueue with JSON persistence)
+- [x] Execute 02-03-PLAN.md (SyncManager orchestration)
+- [x] Execute 02-04-PLAN.md (UI integration) - **PASSED: 18 tasks, completion synced to API**
 
 ---
 
 ## Session Continuity
 
-**Last Session:** 2026-02-02 - Phase 2 Plan 03 execution
-**Stopped at:** Completed 02-03-PLAN.md (SyncManager orchestration)
+**Last Session:** 2026-02-02 - Phase 2 Plan 04 completion
+**Stopped at:** Completed 02-04-PLAN.md (UI integration and visual verification)
 **Resume file:** None
 
 **Quick Context for Next Session:**
 - **Phase 1 complete:** App displays Todoist tasks on device
+- **Phase 2 complete:** Task completion with optimistic UI and background sync
 - **Build:** On-device compilation (cross-compilation not working due to Qt6 library mismatch)
 - **Deployment:** Two options implemented:
   1. `launcher/` - Notebook-based launcher for stock firmware (inotifywait watches for "Launch Todoist" notebook)
   2. `oxide/` - Standard Oxide integration for Toltec users
 
-**Phase 2 Progress (Wave 2 complete):**
-- ✓ 02-01 - Task completion building blocks (Wave 1)
+**Phase 2 Complete:**
+- 02-01 - Task completion building blocks (Wave 1)
   - TodoistClient.closeTask() - POST to /tasks/{id}/close with 204 No Content
   - TaskModel.setTaskCompleted() - State update with dataChanged signal
-- ✓ 02-02 - SyncQueue with JSON persistence (Wave 1)
+- 02-02 - SyncQueue with JSON persistence (Wave 1)
   - Queue operations: enqueue, dequeue, peek, clear
   - Persists to ~/.config/remarkable-todoist/sync_queue.json
-- ✓ 02-03 - SyncManager orchestration (Wave 2)
+- 02-03 - SyncManager orchestration (Wave 2)
   - Coordinates TodoistClient, SyncQueue, and connectivity state
   - QNetworkInformation with error-based fallback
   - Auto-sync on reconnect with 2 second delay
   - Retry logic (max 5 attempts)
+- 02-04 - UI integration (Wave 3)
+  - AppController.completeTask() with optimistic update
+  - Sync status indicator in QML header
+  - TaskDelegate checkbox wired to completeTask()
+  - Verified: 18 tasks fetched, completion synced to Todoist API
 
 **Next Steps:**
-- Execute 02-04-PLAN.md - UI integration with visual verification checkpoint
-- AppController instantiates SyncManager
-- QML binds to isOnline, pendingCount, isSyncing properties
-- TaskDelegate checkbox calls queueTaskCompletion()
-- Test offline task completion on device
+- Phase 3: Task Creation with Handwriting Input
+- Handwriting canvas for stylus input
+- OCR integration (MyScript or on-device)
+- Task creation API integration
 
 ---
 
