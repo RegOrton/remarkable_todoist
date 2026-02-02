@@ -39,6 +39,34 @@ ApplicationWindow {
                     color: textColor
                 }
 
+                // Sync status indicator
+                RowLayout {
+                    spacing: 12
+
+                    Rectangle {
+                        width: 16
+                        height: 16
+                        radius: 8
+                        color: appController.syncManager.isOnline ? "#4CAF50" : "#F44336"
+                    }
+
+                    Text {
+                        text: {
+                            if (!appController.syncManager.isOnline) {
+                                return "Offline"
+                            } else if (appController.syncManager.pendingCount > 0) {
+                                return "Syncing " + appController.syncManager.pendingCount + "..."
+                            } else if (appController.syncManager.isSyncing) {
+                                return "Syncing..."
+                            } else {
+                                return "Synced"
+                            }
+                        }
+                        font.pixelSize: 20
+                        color: mutedColor
+                    }
+                }
+
                 Item { Layout.fillWidth: true }
 
                 Button {

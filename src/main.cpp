@@ -5,6 +5,7 @@
 
 #include "controllers/appcontroller.h"
 #include "models/taskmodel.h"
+#include "network/sync_manager.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,9 @@ int main(int argc, char *argv[])
 
     // Set up QML engine
     QQmlApplicationEngine engine;
+
+    // Register SyncManager for QML
+    qmlRegisterUncreatableType<SyncManager>("RemarkableTodoist", 1, 0, "SyncManager", "Access via appController.syncManager");
 
     // Expose controller and model to QML
     engine.rootContext()->setContextProperty("appController", &controller);
