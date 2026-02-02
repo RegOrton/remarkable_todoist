@@ -15,7 +15,7 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 
 **Goal:** User can view all their Todoist tasks on the reMarkable 2
 
-**Status:** Planning Complete
+**Status:** Complete
 
 **Dependencies:** None (foundation phase)
 
@@ -39,10 +39,10 @@ This roadmap delivers a working Todoist client for the reMarkable 2 in three pha
 **Plans:** 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project foundation: CMake build, Task model, Settings module
-- [ ] 01-02-PLAN.md — Todoist API client with error handling
-- [ ] 01-03-PLAN.md — Task list UI: TaskListView and TaskDelegate
-- [ ] 01-04-PLAN.md — Integration and visual verification
+- [x] 01-01-PLAN.md — Project foundation: CMake build, Task model, Settings module
+- [x] 01-02-PLAN.md — Todoist API client with error handling
+- [x] 01-03-PLAN.md — Task list UI: TaskListView and TaskDelegate
+- [x] 01-04-PLAN.md — Integration and visual verification
 
 ---
 
@@ -50,7 +50,7 @@ Plans:
 
 **Goal:** User can refresh task list and check off completed tasks
 
-**Status:** Pending
+**Status:** Planning Complete
 
 **Dependencies:** Phase 1 (requires task display and auth foundation)
 
@@ -67,7 +67,13 @@ Plans:
 4. User sees sync status indicator showing online/offline state and pending changes
 5. Queued changes sync automatically when WiFi reconnects, without data loss
 
-**Plans:** 0 planned, 0 completed
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — TodoistClient closeTask() and TaskModel setTaskCompleted()
+- [ ] 02-02-PLAN.md — SyncQueue with JSON persistence
+- [ ] 02-03-PLAN.md — SyncManager for connectivity and queue orchestration
+- [ ] 02-04-PLAN.md — Integration and visual verification
 
 ---
 
@@ -99,11 +105,11 @@ Plans:
 
 | Phase | Status | Plans | Requirements | Completion |
 |-------|--------|-------|--------------|------------|
-| 1 - Foundation & Task Display | Planning Complete | 0/4 | 8 | 0% |
-| 2 - Sync & Task Completion | Pending | 0/0 | 4 | 0% |
+| 1 - Foundation & Task Display | Complete | 4/4 | 8 | 100% |
+| 2 - Sync & Task Completion | Planning Complete | 0/4 | 4 | 0% |
 | 3 - Task Creation | Pending | 0/0 | 3 | 0% |
 
-**Overall:** 0% complete (0/15 requirements delivered)
+**Overall:** 53% complete (8/15 requirements delivered)
 
 ---
 
@@ -113,6 +119,8 @@ Plans:
 |------|---------|---------|
 | 2026-01-29 | 1.0 | Initial roadmap created with 3 phases covering all 15 v1 requirements |
 | 2026-01-30 | 1.1 | Phase 1 planning complete: 4 plans in 3 waves |
+| 2026-02-01 | 1.2 | Phase 1 complete: App displays Todoist tasks on reMarkable |
+| 2026-02-02 | 1.3 | Phase 2 planning complete: 4 plans in 3 waves |
 
 ---
 
