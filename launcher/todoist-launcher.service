@@ -1,0 +1,12 @@
+[Unit]
+Description=Todoist Launcher Notebook Watcher
+After=xochitl.service
+
+[Service]
+Type=simple
+ExecStart=/opt/bin/todoist-launcher.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

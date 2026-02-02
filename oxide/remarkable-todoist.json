@@ -1,0 +1,10 @@
+{
+  "name": "Todoist",
+  "description": "Task management with Todoist sync",
+  "bin": "/opt/bin/remarkable-todoist",
+  "icon": "todo",
+  "term": false,
+  "type": "foreground",
+  "displayName": "Todoist",
+  "permissions": ["wifi", "power"]
+}
