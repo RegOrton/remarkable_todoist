@@ -5,6 +5,7 @@
 #include "../models/task.h"
 #include "../models/taskmodel.h"
 #include "../network/todoist_client.h"
+#include "../network/sync_manager.h"
 #include "../config/settings.h"
 
 AppController::AppController(QObject *parent)
@@ -13,6 +14,7 @@ AppController::AppController(QObject *parent)
     , m_errorMessage("")
     , m_taskModel(nullptr)
     , m_todoistClient(nullptr)
+    , m_syncManager(nullptr)
 {
     // Create task model
     m_taskModel = new TaskModel(this);
@@ -45,6 +47,9 @@ void AppController::initialize()
     // Create Todoist client with the token
     QString token = AppSettings::getApiToken();
     m_todoistClient = new TodoistClient(token, this);
+
+    // Create SyncManager after TodoistClient
+    m_syncManager = new SyncManager(m_todoistClient, this);
 
     // Connect signals
     connect(m_todoistClient, &TodoistClient::projectsFetched,
@@ -112,4 +117,13 @@ void AppController::setErrorMessage(const QString& message)
         m_errorMessage = message;
         emit errorMessageChanged();
     }
+}
+
+void AppController::completeTask(const QString& taskId)
+{
+    // Optimistic UI update
+    m_taskModel->setTaskCompleted(taskId, true);
+
+    // Queue for sync
+    m_syncManager->queueTaskCompletion(taskId);
 }

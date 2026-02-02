@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QVector>
 #include "../models/task.h"
+#include "../network/sync_manager.h"
 
 class TodoistClient;
 class TaskModel;
@@ -24,6 +25,7 @@ class AppController : public QObject
     Q_OBJECT
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
+    Q_PROPERTY(SyncManager* syncManager READ syncManager CONSTANT)
 
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -43,6 +45,7 @@ public:
     // Property accessors
     bool loading() const { return m_loading; }
     QString errorMessage() const { return m_errorMessage; }
+    SyncManager* syncManager() const { return m_syncManager; }
 
 public slots:
     /**
@@ -50,6 +53,11 @@ public slots:
      * Fetches projects then tasks from Todoist API
      */
     void refresh();
+
+    /**
+     * Complete a task (optimistic update + queue for sync)
+     */
+    Q_INVOKABLE void completeTask(const QString& taskId);
 
 signals:
     void loadingChanged();
@@ -71,6 +79,7 @@ private:
     // Data layer
     TaskModel* m_taskModel;
     TodoistClient* m_todoistClient;
+    SyncManager* m_syncManager;
 };
 
 #endif // APPCONTROLLER_H
