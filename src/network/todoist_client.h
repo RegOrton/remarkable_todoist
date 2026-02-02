@@ -49,6 +49,14 @@ public:
      */
     void fetchProjects();
 
+    /**
+     * @brief Close (complete) a task in Todoist
+     * @param taskId The ID of the task to close
+     *
+     * Emits taskClosed() on success or closeTaskFailed() on failure.
+     */
+    void closeTask(const QString& taskId);
+
 signals:
     /**
      * @brief Emitted when tasks have been successfully fetched
@@ -68,9 +76,23 @@ signals:
      */
     void errorOccurred(const QString& error);
 
+    /**
+     * @brief Emitted when a task has been successfully closed
+     * @param taskId The ID of the closed task
+     */
+    void taskClosed(const QString& taskId);
+
+    /**
+     * @brief Emitted when closing a task fails
+     * @param taskId The ID of the task that failed to close
+     * @param error User-friendly error message
+     */
+    void closeTaskFailed(const QString& taskId, const QString& error);
+
 private slots:
     void onTasksReplyFinished();
     void onProjectsReplyFinished();
+    void onCloseTaskReplyFinished();
 
 private:
     QString handleNetworkError(QNetworkReply* reply);

@@ -44,6 +44,21 @@ void TodoistClient::fetchProjects()
     connect(reply, &QNetworkReply::finished, this, &TodoistClient::onProjectsReplyFinished);
 }
 
+void TodoistClient::closeTask(const QString& taskId)
+{
+    qDebug() << "Closing task" << taskId << "via Todoist API...";
+
+    QString urlString = QString("https://api.todoist.com/rest/v2/tasks/%1/close").arg(taskId);
+    QUrl url(urlString);
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_apiToken).toUtf8());
+    request.setTransferTimeout(REQUEST_TIMEOUT_MS);
+
+    // POST with empty body (required by Qt for bodyless POST)
+    QNetworkReply* reply = m_networkManager->post(request, QByteArray());
+    connect(reply, &QNetworkReply::finished, this, &TodoistClient::onCloseTaskReplyFinished);
+}
+
 void TodoistClient::onTasksReplyFinished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
@@ -146,6 +161,42 @@ void TodoistClient::onProjectsReplyFinished()
 
     qDebug() << "Successfully fetched" << m_projectNames.size() << "projects";
     emit projectsFetched(m_projectNames);
+
+    // Critical: prevent memory leak
+    reply->deleteLater();
+}
+
+void TodoistClient::onCloseTaskReplyFinished()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) {
+        qWarning() << "onCloseTaskReplyFinished called with invalid sender";
+        return;
+    }
+
+    // Extract task ID from URL (e.g., https://api.todoist.com/rest/v2/tasks/12345/close)
+    QString url = reply->url().toString();
+    QString taskId = url.section('/', -2, -2);  // Extract ID from path
+
+    // Check for network errors
+    if (reply->error() != QNetworkReply::NoError) {
+        QString errorMsg = handleNetworkError(reply);
+        qWarning() << "Close task" << taskId << "failed:" << errorMsg;
+        emit closeTaskFailed(taskId, errorMsg);
+        reply->deleteLater();
+        return;
+    }
+
+    // Check for 204 No Content status code (success)
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (statusCode == 204) {
+        qDebug() << "Successfully closed task" << taskId;
+        emit taskClosed(taskId);
+    } else {
+        QString errorMsg = QString("Unexpected status code: %1").arg(statusCode);
+        qWarning() << "Close task" << taskId << "failed:" << errorMsg;
+        emit closeTaskFailed(taskId, errorMsg);
+    }
 
     // Critical: prevent memory leak
     reply->deleteLater();
