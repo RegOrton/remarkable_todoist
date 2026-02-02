@@ -49,8 +49,10 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        // Toggle completion (Phase 2 feature)
-                        console.log("Toggle task:", model.id)
+                        // Only allow completing non-completed tasks
+                        if (!model.completed) {
+                            appController.completeTask(model.id)
+                        }
                     }
                 }
             }
