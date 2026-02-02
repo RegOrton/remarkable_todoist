@@ -470,9 +470,51 @@ Build order based on dependencies, enabling incremental testing.
 
 ---
 
-## Oxide Application Registration
+## Application Deployment
 
-### Required Files
+### Stock Firmware (No Toltec)
+
+On newer reMarkable OS versions where Toltec isn't supported, use one of these approaches:
+
+#### Option 1: Launcher Notebook (Recommended)
+
+A background service watches for a specific notebook to be opened, then switches from Xochitl to the app.
+
+**How it works:**
+1. Systemd service runs `todoist-launcher.sh` in background
+2. Service uses `inotifywait` to monitor for "Launch Todoist" notebook access
+3. When notebook opened: stop Xochitl → run app → restart Xochitl on exit
+
+**Files:**
+```
+/opt/bin/remarkable-todoist           # Main executable
+/opt/bin/todoist-launcher.sh          # Watcher script
+/etc/systemd/system/todoist-launcher.service  # Systemd unit
+```
+
+**Requires:** `inotifywait` (from inotify-tools) on device
+
+#### Option 2: Manual SSH Launch
+
+```bash
+systemctl stop xochitl
+export QT_QPA_PLATFORM=epaper
+export QT_QUICK_BACKEND=epaper
+./remarkable-todoist
+systemctl start xochitl
+```
+
+#### Option 3: Autostart Service
+
+Create a systemd service that runs the app on boot, replacing Xochitl.
+
+---
+
+### Oxide/Toltec (If Supported)
+
+For devices with Toltec/Oxide installed:
+
+#### Required Files
 
 ```
 /opt/bin/remarkable-todoist          # Main executable
@@ -480,7 +522,7 @@ Build order based on dependencies, enabling incremental testing.
 /opt/usr/share/applications/remarkable-todoist.oxide  # Desktop entry
 ```
 
-### remarkable-todoist.oxide Example
+#### remarkable-todoist.json Example
 
 ```json
 {
@@ -495,7 +537,7 @@ Build order based on dependencies, enabling incremental testing.
 }
 ```
 
-### Toltec Package Structure
+#### Toltec Package Structure
 
 ```
 package/
@@ -510,6 +552,40 @@ package/
         └── applications/
             └── remarkable-todoist.oxide
 ```
+
+---
+
+## Build Environment
+
+### On-Device Building (Current Approach)
+
+Cross-compilation from desktop is problematic because:
+- Official reMarkable toolchain (v3.1.15) lacks Qt6 Quick/QML libraries
+- Toltec Docker images have Qt5, not Qt6
+- Library version mismatches cause linker failures
+
+**Solution:** Build directly on the reMarkable device where Qt6 is already installed.
+
+```bash
+# On device
+cd ~/Remarkable_Todoist
+make
+```
+
+### Cross-Compilation (Not Currently Working)
+
+If cross-compilation is needed in the future, the toolchain setup is:
+
+```bash
+# Download official toolchain
+source ~/remarkable-toolchain/environment-setup-cortexa7hf-neon-remarkable-linux-gnueabi
+
+# Build with CMake
+cmake -B build-rm -DCMAKE_TOOLCHAIN_FILE=cmake/remarkable.cmake
+cmake --build build-rm
+```
+
+The issue is that the sysroot must contain matching Qt6 Quick/QML libraries, which aren't currently available in the official or Toltec toolchains.
 
 ---
 

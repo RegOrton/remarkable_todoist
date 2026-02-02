@@ -1,8 +1,8 @@
 # Project State: Remarkable Todoist
 
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-02-01
 **Phase:** 1 - Foundation & Task Display
-**Status:** In Progress
+**Status:** Complete
 
 ---
 
@@ -91,6 +91,10 @@
 | Stop xochitl before running | Must stop main UI: `systemctl stop xochitl` | 01-04 | 2026-01-31 |
 | USB network route | `ip route add default via 10.11.99.8` for API access via USB | 01-04 | 2026-01-31 |
 | Touch rotation | `QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS="rotate=180:invertx"` | 01-04 | 2026-01-31 |
+| **On-device building** | Cross-compilation toolchain lacks Qt6 Quick/QML libraries; build on device instead | Deploy | 2026-02-01 |
+| **Stock firmware (no Toltec)** | Toltec not supported on current reMarkable OS version | Deploy | 2026-02-01 |
+| **Launcher notebook for app launch** | No app launcher on stock firmware; use inotifywait to detect notebook open, switch to app | Deploy | 2026-02-01 |
+| Oxide integration as fallback | If user has Toltec/Oxide, can use standard launcher metadata at /opt/etc/draft/ | Deploy | 2026-02-01 |
 
 ### Open Questions
 
@@ -118,35 +122,32 @@ None
 
 ## Session Continuity
 
-**Last Session:** 2026-01-31 - Working on 01-04 integration, discovered Qt6 Quick/QML requirement
-**Stopped at:** Crash during 01-04 integration refactor to Qt6 Quick/QML
+**Last Session:** 2026-02-01 - Deployment options for stock firmware
+**Stopped at:** Committed launcher notebook and Oxide integration
 **Resume file:** None
 
 **Quick Context for Next Session:**
-- Plan 01-01 complete: Task model, TaskModel, AppSettings
-- Plan 01-02 complete: TodoistClient with async HTTP, error handling, task fetching
-- Plan 01-03 complete: C++ TaskListView/TaskDelegate (now obsolete - replaced by QML)
-- **MAJOR CHANGE in 01-04:** Discovered reMarkable 3.x uses Qt6 Quick/QML, not Qt5 Widgets
-- Refactored AppController to expose Q_PROPERTY for QML binding (loading, errorMessage)
-- Created QML UI: main.qml (full app), TaskDelegate.qml (task row)
-- CMakeLists.txt updated: Qt6::Quick, Qt6::Qml, qt_add_resources
-- main.cpp uses QGuiApplication + QQmlApplicationEngine
+- **Phase 1 complete:** App displays Todoist tasks on device
+- **Build:** On-device compilation (cross-compilation not working due to Qt6 library mismatch)
+- **Deployment:** Two options implemented:
+  1. `launcher/` - Notebook-based launcher for stock firmware (inotifywait watches for "Launch Todoist" notebook)
+  2. `oxide/` - Standard Oxide integration for Toltec users
+- **Key learnings:**
+  - Toltec not supported on current reMarkable OS version
+  - Cross-compilation toolchain lacks Qt6 Quick/QML libraries
+  - Stock firmware has no app launcher - must stop xochitl to run custom apps
+  - Launcher notebook pattern: systemd service + inotifywait + notebook trigger
 
-**Uncommitted Changes (need to commit):**
-- CMakeLists.txt (Qt6 Quick instead of Qt5 Widgets)
-- src/controllers/appcontroller.h, appcontroller.cpp (QML-friendly properties)
-- src/main.cpp (QGuiApplication + QQmlApplicationEngine)
-- src/models/taskmodel.h, taskmodel.cpp (IdRole, proper roleNames for QML)
-- qml/main.qml (new - full application UI)
-- qml/TaskDelegate.qml (new - task row component)
-- qml/qml.qrc (new - Qt resource file)
-- build-rm.sh (new - cross-compile script)
-- scripts/setup-rm-toolchain.sh (new - toolchain setup)
-- cmake/remarkable.cmake (new - CMake toolchain file)
+**Deployment Files (committed):**
+- launcher/todoist-launcher.sh - Watches for notebook, switches apps
+- launcher/todoist-launcher.service - Systemd unit
+- launcher/install.sh - Installation script
+- oxide/remarkable-todoist.json - Oxide metadata
+- oxide/install.sh - Oxide installation script
 
-**C++ Widget Files (now obsolete):**
-- src/views/tasklistview.h, tasklistview.cpp - replaced by main.qml
-- src/views/taskdelegate.h, taskdelegate.cpp - replaced by TaskDelegate.qml
+**Next Steps:**
+- Test launcher notebook on device (requires inotify-tools)
+- Begin Phase 2: Sync & Task Completion
 
 ---
 
