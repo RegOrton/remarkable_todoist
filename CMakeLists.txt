@@ -19,6 +19,7 @@ set(SOURCES
     src/main.cpp
     src/models/task.cpp
     src/models/taskmodel.cpp
+    src/models/sync_queue.cpp
     src/config/settings.cpp
     src/network/todoist_client.cpp
     src/controllers/appcontroller.cpp
