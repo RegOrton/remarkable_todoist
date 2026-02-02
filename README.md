@@ -5,85 +5,79 @@ A Todoist client for the reMarkable 2 e-ink tablet. View, manage, and complete y
 ## Features
 
 - View all Todoist tasks with name, due date, project, and priority
+- Mark tasks complete with checkbox (syncs to Todoist)
+- Offline support - complete tasks without WiFi, syncs when reconnected
 - Touch-friendly interface optimized for e-ink display
 - Works on stock reMarkable firmware (no Toltec required)
 
 ## Current Status
 
-**Phase 1 Complete** - The app displays tasks from the Todoist API.
+**Phase 2 Complete** - View tasks and mark them complete with offline sync.
+
+## Quick Start (Full Deployment)
+
+### 1. Copy to Device
+
+From your computer:
+```bash
+scp -r ~/Remarkable_Todoist root@10.11.99.1:~/
+```
+
+### 2. Build and Install
+
+SSH to device and run:
+```bash
+ssh root@10.11.99.1
+
+cd ~/Remarkable_Todoist
+
+# Build the app
+mkdir -p build && cd build
+cmake .. && make
+cd ..
+
+# Configure API token (get from https://todoist.com/prefs/integrations)
+mkdir -p ~/.config/remarkable-todoist
+echo "[General]
+apiToken=YOUR_TODOIST_API_TOKEN" > ~/.config/remarkable-todoist/config.ini
+chmod 600 ~/.config/remarkable-todoist/config.ini
+
+# Install launcher (automatically builds inotify-tools if needed)
+./launcher/install.sh
+```
+
+### 3. Launch the App
+
+1. Create a notebook named exactly: **"Launch Todoist"**
+2. Open that notebook to launch the app
+3. Tap **Exit** button to return to normal reMarkable UI
 
 ## Requirements
 
 - reMarkable 2 tablet
 - Todoist account with API token
 - WiFi connection (for syncing)
+- On device: `gcc`, `make`, `wget`, `cmake` (for building)
 
-## Building
-
-The app is built **on the reMarkable device itself** (cross-compilation from desktop is not currently working).
-
-### On the Device
-
-```bash
-cd ~/Remarkable_Todoist
-mkdir -p build && cd build
-cmake ..
-make
-```
-
-This produces `build/remarkable-todoist`.
-
-## Configuration
-
-Create the config file with your Todoist API token:
-
-```bash
-mkdir -p ~/.config/remarkable-todoist
-echo "[General]
-apiToken=YOUR_TODOIST_API_TOKEN" > ~/.config/remarkable-todoist/config.ini
-chmod 600 ~/.config/remarkable-todoist/config.ini
-```
-
-Get your API token from: https://todoist.com/prefs/integrations
-
-## Running
+## Alternative Launch Methods
 
 ### Manual Launch (via SSH)
 
 ```bash
-# Stop the default UI
 systemctl stop xochitl
-
-# Set up display (if needed)
 export QT_QPA_PLATFORM=epaper
 export QT_QUICK_BACKEND=epaper
-
-# Run the app
-./remarkable-todoist
-
-# When done, restart the default UI
+./build/remarkable-todoist
 systemctl start xochitl
 ```
-
-### Launcher Notebook (No SSH Required)
-
-After initial setup, you can launch the app by opening a special notebook:
-
-1. Install the launcher: `./launcher/install.sh`
-2. Create a notebook named exactly: **"Launch Todoist"**
-3. Open that notebook to launch the app
-4. Exit the app to return to the normal reMarkable UI
-
-See `launcher/README.md` for details.
 
 ### Oxide Launcher (Toltec Users)
 
 If you have Toltec/Oxide installed:
-
-1. Run `./oxide/install.sh`
-2. The app appears in your Oxide launcher
-
-See `oxide/README.md` for details.
+```bash
+./oxide/install.sh
+```
+The app appears in your Oxide launcher. See `oxide/README.md` for details.
 
 ## Project Structure
 
