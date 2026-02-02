@@ -1,8 +1,8 @@
 # Project State: Remarkable Todoist
 
-**Last Updated:** 2026-02-01
-**Phase:** 1 - Foundation & Task Display
-**Status:** Complete
+**Last Updated:** 2026-02-02
+**Phase:** 2 - Sync & Task Completion
+**Status:** In Progress
 
 ---
 
@@ -10,7 +10,7 @@
 
 **Core Value:** View and manage Todoist tasks on the reMarkable 2 without needing a phone or computer
 
-**Current Focus:** Establish development environment and build read-only task display with proper e-ink rendering and auth foundation
+**Current Focus:** Enable task completion with sync queue and background sync management
 
 **Active Constraints:**
 - E-ink display (slow refresh, monochrome, high contrast required)
@@ -22,18 +22,18 @@
 
 ## Current Position
 
-**Phase:** 1 of 3 (Foundation & Task Display)
-**Plan:** 01-04 complete (4 of 4)
-**Status:** **PHASE 1 COMPLETE** - verified on device
-**Last activity:** 2026-01-31 - App running on reMarkable, displaying Todoist tasks
+**Phase:** 2 of 3 (Sync & Task Completion)
+**Plan:** 02-01 complete (1 of 4)
+**Status:** In Progress
+**Last activity:** 2026-02-02 - Completed 02-01-PLAN.md (Task completion building blocks)
 
-**Progress:** [██████████░░░░░░░░░░] 20% (3/15 plans delivered)
+**Progress:** [████████████░░░░░░░░] 50% (4/8 plans delivered)
 
-**Phase Goal:** User can view all their Todoist tasks on the reMarkable 2
+**Phase Goal:** User can complete tasks offline with automatic background sync
 
-**Active Requirements:** AUTH-01, AUTH-02, DISP-01, DISP-02, DISP-03, DISP-04, DISP-05, DISP-06
+**Active Requirements:** SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03
 
-**Next Milestone:** Complete 01-04-PLAN.md - commit Qt6/QML changes, verify on device
+**Next Milestone:** Complete 02-03-PLAN.md - SyncManager implementation
 
 ---
 
@@ -47,17 +47,17 @@
 
 **Phases:**
 - Total: 3
-- Completed: 0
+- Completed: 1
 - In Progress: 1
-- Pending: 2
-
-**Plans:**
-- Total: 4 (Phase 1)
-- Completed: 3
-- In Progress: 0
 - Pending: 1
 
-**Velocity:** 10 min/plan (3 data points: 16 + 11 + 3 = 30 min / 3 plans)
+**Plans:**
+- Total: 8 (across all phases)
+- Completed: 4
+- In Progress: 0
+- Pending: 4
+
+**Velocity:** 7 min/plan (4 data points: 16 + 11 + 3 + 2 = 32 min / 4 plans)
 
 ---
 
@@ -95,6 +95,9 @@
 | **Stock firmware (no Toltec)** | Toltec not supported on current reMarkable OS version | Deploy | 2026-02-01 |
 | **Launcher notebook for app launch** | No app launcher on stock firmware; use inotifywait to detect notebook open, switch to app | Deploy | 2026-02-01 |
 | Oxide integration as fallback | If user has Toltec/Oxide, can use standard launcher metadata at /opt/etc/draft/ | Deploy | 2026-02-01 |
+| Immediate queue persistence | Save to JSON on every enqueue/dequeue for crash safety | 02-02 | 2026-02-02 |
+| QStandardPaths for queue storage | Use AppDataLocation instead of hardcoded ~/.local/share | 02-02 | 2026-02-02 |
+| QVector for queue implementation | Simple, adequate performance for small queues (<10 items typically) | 02-02 | 2026-02-02 |
 
 ### Open Questions
 
@@ -122,8 +125,8 @@ None
 
 ## Session Continuity
 
-**Last Session:** 2026-02-01 - Deployment options for stock firmware
-**Stopped at:** Committed launcher notebook and Oxide integration
+**Last Session:** 2026-02-02 - Phase 2 Plan 02 execution
+**Stopped at:** Completed 02-02-PLAN.md (SyncQueue with JSON persistence)
 **Resume file:** None
 
 **Quick Context for Next Session:**
@@ -138,16 +141,16 @@ None
   - Stock firmware has no app launcher - must stop xochitl to run custom apps
   - Launcher notebook pattern: systemd service + inotifywait + notebook trigger
 
-**Deployment Files (committed):**
-- launcher/todoist-launcher.sh - Watches for notebook, switches apps
-- launcher/todoist-launcher.service - Systemd unit
-- launcher/install.sh - Installation script
-- oxide/remarkable-todoist.json - Oxide metadata
-- oxide/install.sh - Oxide installation script
+**Phase 2 Progress:**
+- ✓ 02-02 - SyncQueue with JSON persistence
+  - Crash-safe operation queue at ~/.local/share/remarkable-todoist/sync_queue.json
+  - UUID-based idempotency for sync operations
+  - QStandardPaths for cross-platform data directory
 
 **Next Steps:**
-- Test launcher notebook on device (requires inotify-tools)
-- Begin Phase 2: Sync & Task Completion
+- Execute 02-03-PLAN.md - SyncManager implementation
+- Execute 02-04-PLAN.md - Integration with UI
+- Test offline task completion on device
 
 ---
 
