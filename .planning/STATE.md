@@ -23,17 +23,17 @@
 ## Current Position
 
 **Phase:** 2 of 3 (Sync & Task Completion)
-**Plan:** 02-01 complete (1 of 4)
+**Plan:** 02-03 complete (3 of 4)
 **Status:** In Progress
-**Last activity:** 2026-02-02 - Completed 02-01-PLAN.md (Task completion building blocks)
+**Last activity:** 2026-02-02 - Completed 02-03-PLAN.md (SyncManager orchestration)
 
-**Progress:** [████████████░░░░░░░░] 50% (4/8 plans delivered)
+**Progress:** [██████████████░░░░░░] 62% (5/8 plans delivered)
 
 **Phase Goal:** User can complete tasks offline with automatic background sync
 
 **Active Requirements:** SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03
 
-**Next Milestone:** Complete 02-03-PLAN.md - SyncManager implementation
+**Next Milestone:** Complete 02-04-PLAN.md - UI integration and visual verification
 
 ---
 
@@ -53,11 +53,11 @@
 
 **Plans:**
 - Total: 8 (across all phases)
-- Completed: 4
+- Completed: 5
 - In Progress: 0
-- Pending: 4
+- Pending: 3
 
-**Velocity:** 7 min/plan (4 data points: 16 + 11 + 3 + 2 = 32 min / 4 plans)
+**Velocity:** 6 min/plan (5 data points: 16 + 11 + 3 + 2 + 2 = 34 min / 5 plans)
 
 ---
 
@@ -98,6 +98,11 @@
 | POST with empty QByteArray | Qt requires empty body for bodyless POST; Todoist /close returns 204 No Content | 02-01 | 2026-02-02 |
 | Linear scan in setTaskCompleted | Task list is small (<100 items), no need for hash map | 02-01 | 2026-02-02 |
 | dataChanged with specific role | Emit {CompletedRole} for minimal QML update instead of all roles | 02-01 | 2026-02-02 |
+| Optimistic online state | Assume online until proven otherwise - better UX for immediate sync attempts | 02-03 | 2026-02-02 |
+| QNetworkInformation with error-based fallback | May not work on reMarkable; fallback detects offline via timeout/connection errors | 02-03 | 2026-02-02 |
+| 2 second delay after connectivity restoration | Avoid race conditions when network just came up; gives WiFi/DNS time to stabilize | 02-03 | 2026-02-02 |
+| Dequeue only after server confirms success | Never remove operation on failure; only dequeue after 204 No Content to prevent data loss | 02-03 | 2026-02-02 |
+| Max 5 retry attempts | Balance persistence vs avoiding infinite loops on permanent failures | 02-03 | 2026-02-02 |
 
 ### Open Questions
 
@@ -125,8 +130,8 @@ None
 
 ## Session Continuity
 
-**Last Session:** 2026-02-02 - Phase 2 Plan 01 execution
-**Stopped at:** Completed 02-01-PLAN.md (Task completion building blocks)
+**Last Session:** 2026-02-02 - Phase 2 Plan 03 execution
+**Stopped at:** Completed 02-03-PLAN.md (SyncManager orchestration)
 **Resume file:** None
 
 **Quick Context for Next Session:**
@@ -136,16 +141,24 @@ None
   1. `launcher/` - Notebook-based launcher for stock firmware (inotifywait watches for "Launch Todoist" notebook)
   2. `oxide/` - Standard Oxide integration for Toltec users
 
-**Phase 2 Progress:**
-- ✓ 02-01 - Task completion building blocks
+**Phase 2 Progress (Wave 2 complete):**
+- ✓ 02-01 - Task completion building blocks (Wave 1)
   - TodoistClient.closeTask() - POST to /tasks/{id}/close with 204 No Content
   - TaskModel.setTaskCompleted() - State update with dataChanged signal
-  - Both methods follow established patterns from Phase 1
+- ✓ 02-02 - SyncQueue with JSON persistence (Wave 1)
+  - Queue operations: enqueue, dequeue, peek, clear
+  - Persists to ~/.config/remarkable-todoist/sync_queue.json
+- ✓ 02-03 - SyncManager orchestration (Wave 2)
+  - Coordinates TodoistClient, SyncQueue, and connectivity state
+  - QNetworkInformation with error-based fallback
+  - Auto-sync on reconnect with 2 second delay
+  - Retry logic (max 5 attempts)
 
 **Next Steps:**
-- Execute 02-02-PLAN.md - SyncQueue implementation with JSON persistence
-- Execute 02-03-PLAN.md - SyncManager orchestration
-- Execute 02-04-PLAN.md - UI integration and visual verification
+- Execute 02-04-PLAN.md - UI integration with visual verification checkpoint
+- AppController instantiates SyncManager
+- QML binds to isOnline, pendingCount, isSyncing properties
+- TaskDelegate checkbox calls queueTaskCompletion()
 - Test offline task completion on device
 
 ---
