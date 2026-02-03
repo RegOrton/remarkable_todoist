@@ -95,7 +95,7 @@ ApplicationWindow {
 
                 Button {
                     text: "Exit"
-                    onClicked: Qt.quit()
+                    onClicked: appController.quit()
 
                     contentItem: Text {
                         text: parent.text

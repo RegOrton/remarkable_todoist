@@ -59,6 +59,11 @@ public slots:
      */
     Q_INVOKABLE void completeTask(const QString& taskId);
 
+    /**
+     * Quit the application
+     */
+    Q_INVOKABLE void quit();
+
 signals:
     void loadingChanged();
     void errorMessageChanged();

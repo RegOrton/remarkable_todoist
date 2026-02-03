@@ -1,5 +1,6 @@
 #include "appcontroller.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 
 #include "../models/task.h"
@@ -117,6 +118,11 @@ void AppController::setErrorMessage(const QString& message)
         m_errorMessage = message;
         emit errorMessageChanged();
     }
+}
+
+void AppController::quit()
+{
+    QCoreApplication::quit();
 }
 
 void AppController::completeTask(const QString& taskId)

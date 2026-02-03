@@ -48,9 +48,11 @@ watch_for_launch() {
         # Wait a moment for display to be free
         sleep 1
 
-        # Launch Todoist app with e-paper display settings
+        # Launch Todoist app with e-paper display and touch settings
+        export HOME=/home/root
         export QT_QPA_PLATFORM=epaper
         export QT_QUICK_BACKEND=epaper
+        export QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS="rotate=180:invertx"
         $APP_PATH
 
         # App exited, restart Xochitl

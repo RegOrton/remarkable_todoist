@@ -31,6 +31,10 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("appController", &controller);
     engine.rootContext()->setContextProperty("taskModel", controller.taskModel());
 
+    // Connect QML Qt.quit() to application exit
+    QObject::connect(&engine, &QQmlApplicationEngine::quit,
+                     &app, &QGuiApplication::quit);
+
     // Load QML
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
