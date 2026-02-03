@@ -81,7 +81,7 @@ Plans:
 
 **Goal:** User can add new tasks via handwriting input
 
-**Status:** Pending
+**Status:** In Progress
 
 **Dependencies:** Phase 2 (requires sync infrastructure for submitting new tasks)
 
@@ -97,7 +97,13 @@ Plans:
 4. User can submit new task, which appears in task list immediately
 5. New tasks created offline are queued and submitted when WiFi reconnects
 
-**Plans:** 0 planned, 0 completed
+**Plans:** 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Backend: createTask API + SyncQueue/SyncManager extension
+- [ ] 03-02-PLAN.md — DrawingCanvas QML component for stylus handwriting input
+- [ ] 03-03-PLAN.md — Tesseract OCR wrapper + AddTaskScreen QML layout
+- [ ] 03-04-PLAN.md — Full integration, navigation, and end-to-end verification
 
 ---
 
@@ -107,7 +113,7 @@ Plans:
 |-------|--------|-------|--------------|------------|
 | 1 - Foundation & Task Display | Complete | 4/4 | 8 | 100% |
 | 2 - Sync & Task Completion | Complete | 4/4 | 4 | 100% |
-| 3 - Task Creation | Pending | 0/0 | 3 | 0% |
+| 3 - Task Creation | In Progress | 0/4 | 3 | 0% |
 
 **Overall:** 80% complete (12/15 requirements delivered)
 
@@ -122,6 +128,7 @@ Plans:
 | 2026-02-01 | 1.2 | Phase 1 complete: App displays Todoist tasks on reMarkable |
 | 2026-02-02 | 1.3 | Phase 2 planning complete: 4 plans in 3 waves |
 | 2026-02-02 | 1.4 | Phase 2 complete: Task completion with offline sync |
+| 2026-02-03 | 1.5 | Phase 3 planning complete: 4 plans in 3 waves |
 
 ---
 
