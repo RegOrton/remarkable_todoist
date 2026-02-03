@@ -38,9 +38,9 @@ cd ..
 
 # Configure API token (get from https://todoist.com/prefs/integrations)
 mkdir -p ~/.config/remarkable-todoist
-echo "[General]
-apiToken=YOUR_TODOIST_API_TOKEN" > ~/.config/remarkable-todoist/config.ini
-chmod 600 ~/.config/remarkable-todoist/config.ini
+echo "[auth]
+api_token=YOUR_TODOIST_API_TOKEN" > ~/.config/remarkable-todoist/config.conf
+chmod 600 ~/.config/remarkable-todoist/config.conf
 
 # Install launcher (automatically builds inotify-tools if needed)
 ./launcher/install.sh
