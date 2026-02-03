@@ -35,10 +35,15 @@ watch_for_launch() {
 
     echo "Watching for notebook: $NOTEBOOK_NAME (UUID: $uuid)"
 
-    # Watch the notebook's .content file for access
-    # When opened, Xochitl writes to this file
+    # Wait for xochitl to finish its startup file scanning
+    # before we start watching, otherwise boot access triggers us
+    sleep 15
+    echo "Ready - watching for notebook open"
+
     while true; do
-        inotifywait -q -e open,access "$METADATA_DIR/$uuid.content" 2>/dev/null
+        # Watch for open events - the 15s startup delay avoids
+        # false triggers from xochitl's boot-time file scanning
+        inotifywait -q -e open "$METADATA_DIR/$uuid.content" 2>/dev/null
 
         echo "Launcher notebook opened! Starting Todoist..."
 
@@ -59,8 +64,8 @@ watch_for_launch() {
         echo "App closed, restarting Xochitl..."
         systemctl start xochitl
 
-        # Wait for Xochitl to fully start before watching again
-        sleep 3
+        # Wait for Xochitl to finish startup before watching again
+        sleep 15
     done
 }
 
