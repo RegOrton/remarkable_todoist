@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Watches for the "Launch Todoist" notebook to be opened
 # When detected, stops Xochitl and launches the Todoist app
@@ -13,18 +13,25 @@ METADATA_DIR="/home/root/.local/share/remarkable/xochitl"
 
 # Find the notebook UUID by searching metadata files
 find_notebook_uuid() {
-    grep -l "\"visibleName\": \"$NOTEBOOK_NAME\"" "$METADATA_DIR"/*.metadata 2>/dev/null | head -1 | xargs -I{} basename {} .metadata
+    grep -l "\"visibleName\": \"$NOTEBOOK_NAME\"" "$METADATA_DIR"/*.metadata 2>/dev/null | head -n 1 | while read f; do basename "$f" .metadata; done
+}
+
+# Wait for the launcher notebook to appear (may not exist at boot)
+wait_for_notebook() {
+    while true; do
+        uuid=$(find_notebook_uuid)
+        if [ -n "$uuid" ]; then
+            echo "$uuid"
+            return
+        fi
+        echo "Waiting for '$NOTEBOOK_NAME' notebook to be created..."
+        sleep 10
+    done
 }
 
 # Watch Xochitl's log for notebook open events
 watch_for_launch() {
-    local uuid=$(find_notebook_uuid)
-
-    if [ -z "$uuid" ]; then
-        echo "Launcher notebook '$NOTEBOOK_NAME' not found."
-        echo "Create a notebook with this exact name: $NOTEBOOK_NAME"
-        exit 1
-    fi
+    uuid=$(wait_for_notebook)
 
     echo "Watching for notebook: $NOTEBOOK_NAME (UUID: $uuid)"
 
