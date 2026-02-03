@@ -16,58 +16,82 @@ A Todoist client for the reMarkable 2 e-ink tablet. View, manage, and complete y
 
 ## Quick Start (Full Deployment)
 
-### 1. Copy to Device
+### Prerequisites
 
-From your computer:
+On the host machine (arm64 Linux):
+- `arm-linux-gnueabihf-g++` cross-compiler
+- Qt6 development tools (`moc`, `rcc` from `qt6-base-dev-tools`)
+- Device sysroot at `/tmp/rm-sysroot` (see step 1)
+
+On the reMarkable:
+- Stock firmware (tested on 3.24.0.149)
+- USB connection to host (10.11.99.1)
+
+### 1. Pull Sysroot (first time only)
+
+Pull Qt6 and system libraries from the device for cross-compilation:
 ```bash
-scp -r ~/Remarkable_Todoist root@10.11.99.1:~/
+mkdir -p /tmp/rm-sysroot
+ssh root@10.11.99.1 "tar czf - /usr/lib/*.so* /lib/*.so* 2>/dev/null" \
+    | tar xzf - -C /tmp/rm-sysroot/
 ```
 
-### 2. Build and Install
+### 2. Build
 
-SSH to device and run:
+Cross-compile on the host:
+```bash
+./build-rm.sh
+```
+This produces `build-rm/remarkable-todoist` (32-bit ARM).
+
+### 3. Deploy
+
+```bash
+# Deploy binary
+ssh root@10.11.99.1 "mkdir -p /opt/bin"
+scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/
+
+# Deploy inotifywait (first time only - needed for launcher)
+arm-linux-gnueabihf-gcc -static -O2 tools/inotifywait.c -o /tmp/inotifywait
+scp /tmp/inotifywait root@10.11.99.1:/usr/local/bin/
+
+# Deploy launcher scripts
+scp launcher/todoist-launcher.sh root@10.11.99.1:/opt/bin/
+scp launcher/todoist-launcher.service root@10.11.99.1:/etc/systemd/system/
+ssh root@10.11.99.1 "chmod +x /opt/bin/todoist-launcher.sh /opt/bin/remarkable-todoist && \
+    systemctl daemon-reload && systemctl enable --now todoist-launcher.service"
+```
+
+### 4. Configure API Token (first time only)
+
 ```bash
 ssh root@10.11.99.1
-
-cd ~/Remarkable_Todoist
-
-# Build the app
-mkdir -p build && cd build
-cmake .. && make
-cd ..
-
-# Configure API token (get from https://todoist.com/prefs/integrations)
 mkdir -p ~/.config/remarkable-todoist
 echo "[auth]
 api_token=YOUR_TODOIST_API_TOKEN" > ~/.config/remarkable-todoist/config.conf
 chmod 600 ~/.config/remarkable-todoist/config.conf
-
-# Install launcher (automatically builds inotify-tools if needed)
-./launcher/install.sh
 ```
 
-### 3. Launch the App
+Get your API token from: https://todoist.com/prefs/integrations
+
+### 5. Launch the App
 
 1. Create a notebook named exactly: **"Launch Todoist"**
 2. Open that notebook to launch the app
 3. Tap **Exit** button to return to normal reMarkable UI
-
-## Requirements
-
-- reMarkable 2 tablet
-- Todoist account with API token
-- WiFi connection (for syncing)
-- On device: `gcc`, `make`, `wget`, `cmake` (for building)
 
 ## Alternative Launch Methods
 
 ### Manual Launch (via SSH)
 
 ```bash
+ssh root@10.11.99.1
 systemctl stop xochitl
+export HOME=/home/root
 export QT_QPA_PLATFORM=epaper
 export QT_QUICK_BACKEND=epaper
-./build/remarkable-todoist
+export QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS="rotate=180:invertx"
+/opt/bin/remarkable-todoist
 systemctl start xochitl
 ```
 
@@ -83,11 +107,14 @@ The app appears in your Oxide launcher. See `oxide/README.md` for details.
 
 ```
 remarkable-todoist/
+├── build-rm.sh              # Cross-compilation script
+├── tools/
+│   └── inotifywait.c        # Minimal inotifywait for stock firmware
 ├── src/
 │   ├── main.cpp              # Application entry point
 │   ├── controllers/          # App controller (QML bridge)
-│   ├── models/               # Task and TaskModel
-│   ├── network/              # Todoist API client
+│   ├── models/               # Task, TaskModel, SyncQueue
+│   ├── network/              # Todoist API client, SyncManager
 │   └── config/               # Settings management
 ├── qml/
 │   ├── main.qml              # Main UI
@@ -98,9 +125,14 @@ remarkable-todoist/
 
 ## Development Notes
 
-### Why Build On-Device?
+### Cross-Compilation
 
-Cross-compilation requires matching Qt6 libraries for the reMarkable's ARM architecture. The official reMarkable toolchain and Toltec Docker images don't currently provide compatible Qt6 Quick/QML libraries. Building on-device sidesteps this issue.
+The app is cross-compiled from an arm64 host using `build-rm.sh`. This script:
+- Runs Qt6 MOC and RCC using host tools
+- Compiles with `arm-linux-gnueabihf-g++` using host Qt6 headers
+- Links against device libraries via sysroot at `/tmp/rm-sysroot`
+
+The sysroot contains Qt6 `.so` files pulled from the device. This avoids needing a full cross-compilation SDK.
 
 ### Qt6 Quick/QML
 
@@ -108,9 +140,11 @@ reMarkable firmware 3.x uses Qt6 with Quick/QML, not Qt5 Widgets. The UI is impl
 
 ### Display Environment
 
-The app requires e-paper display plugins:
+The app requires e-paper display plugins and touch configuration:
 - `QT_QPA_PLATFORM=epaper`
 - `QT_QUICK_BACKEND=epaper`
+- `QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS="rotate=180:invertx"`
+- `HOME=/home/root` (required when launched from systemd)
 
 These are set automatically by the launcher scripts.
 

@@ -10,64 +10,51 @@ Launch Remarkable Todoist by opening a special notebook - no SSH required after 
 
 ## Installation
 
-1. Build the app on the device:
-   ```bash
-   cd ~/Remarkable_Todoist
-   mkdir -p build && cd build
-   cmake ..
-   make
-   ```
-
-2. Run the install script:
-   ```bash
-   ./launcher/install.sh
-   ```
-
-3. Create a new notebook in Xochitl named exactly: **Launch Todoist**
-
-4. Open that notebook to launch the app.
-
-## Requirements
-
-- `inotifywait` (from inotify-tools) must be available on the device
-- If not installed, you may need to compile it for ARM or find a binary
-
-## Manual Installation
+Prerequisites: The app binary must already be at `/opt/bin/remarkable-todoist` and
+`inotifywait` must be at `/usr/local/bin/inotifywait`. See the main README for
+cross-compilation and deployment instructions.
 
 ```bash
-# Copy files
-sudo cp remarkable-todoist /opt/bin/
-sudo cp launcher/todoist-launcher.sh /opt/bin/
-sudo chmod +x /opt/bin/remarkable-todoist /opt/bin/todoist-launcher.sh
-
-# Install service
-sudo cp launcher/todoist-launcher.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable todoist-launcher.service
-sudo systemctl start todoist-launcher.service
+# Deploy launcher scripts (from host machine)
+scp launcher/todoist-launcher.sh root@10.11.99.1:/opt/bin/
+scp launcher/todoist-launcher.service root@10.11.99.1:/etc/systemd/system/
+ssh root@10.11.99.1 "chmod +x /opt/bin/todoist-launcher.sh && \
+    systemctl daemon-reload && systemctl enable --now todoist-launcher.service"
 ```
+
+Then create a new notebook in Xochitl named exactly: **Launch Todoist**
+
+## How the Watcher Works
+
+- The service waits 15 seconds after xochitl boots to avoid false triggers from
+  xochitl's startup file scanning
+- It watches for `open` events on the notebook's `.content` file
+- When triggered, it stops xochitl, sets up the e-paper display environment, and
+  launches the app
+- On app exit, xochitl is restarted and the watcher resumes after another 15s delay
 
 ## Uninstall
 
 ```bash
-sudo systemctl stop todoist-launcher.service
-sudo systemctl disable todoist-launcher.service
-sudo rm /etc/systemd/system/todoist-launcher.service
-sudo rm /opt/bin/todoist-launcher.sh
-sudo rm /opt/bin/remarkable-todoist
-sudo systemctl daemon-reload
+ssh root@10.11.99.1
+systemctl stop todoist-launcher.service
+systemctl disable todoist-launcher.service
+rm /etc/systemd/system/todoist-launcher.service
+rm /opt/bin/todoist-launcher.sh
+rm /opt/bin/remarkable-todoist
+systemctl daemon-reload
 ```
 
 ## Troubleshooting
 
 Check if the service is running:
 ```bash
-systemctl status todoist-launcher.service
+ssh root@10.11.99.1 "systemctl status todoist-launcher.service"
 ```
 
 View logs:
 ```bash
-journalctl -u todoist-launcher.service -f
+ssh root@10.11.99.1 "journalctl -u todoist-launcher.service -f"
 ```
 
 Make sure your notebook is named exactly "Launch Todoist" (case-sensitive).

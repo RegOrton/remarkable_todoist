@@ -91,7 +91,7 @@
 | Stop xochitl before running | Must stop main UI: `systemctl stop xochitl` | 01-04 | 2026-01-31 |
 | USB network route | `ip route add default via 10.11.99.8` for API access via USB | 01-04 | 2026-01-31 |
 | Touch rotation | `QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS="rotate=180:invertx"` | 01-04 | 2026-01-31 |
-| **On-device building** | Cross-compilation toolchain lacks Qt6 Quick/QML libraries; build on device instead | Deploy | 2026-02-01 |
+| **Cross-compilation via sysroot** | Pull device Qt6 .so files to /tmp/rm-sysroot, cross-compile with arm-linux-gnueabihf-g++ using build-rm.sh | Deploy | 2026-02-03 |
 | **Stock firmware (no Toltec)** | Toltec not supported on current reMarkable OS version | Deploy | 2026-02-01 |
 | **Launcher notebook for app launch** | No app launcher on stock firmware; use inotifywait to detect notebook open, switch to app | Deploy | 2026-02-01 |
 | Oxide integration as fallback | If user has Toltec/Oxide, can use standard launcher metadata at /opt/etc/draft/ | Deploy | 2026-02-01 |
@@ -106,6 +106,11 @@
 | Full SyncManager include in appcontroller.h | Qt6 metaobject requires complete type for Q_PROPERTY, forward declaration insufficient | 02-04 | 2026-02-02 |
 | Null checks for syncManager in QML | SyncManager created in initialize() after QML loads, bindings need null-safe access | 02-04 | 2026-02-02 |
 | Complete-only, no toggle | Checkbox only completes tasks, doesn't reopen (separate feature) | 02-04 | 2026-02-02 |
+| Minimal static inotifywait | Full inotify-tools needs autotools; wrote minimal C replacement (tools/inotifywait.c), cross-compiled static | Deploy | 2026-02-03 |
+| 15s watcher delay after xochitl boot | Xochitl reads all .content files on startup; delay avoids false launcher triggers | Deploy | 2026-02-03 |
+| HOME=/home/root in launcher env | Systemd services have minimal env; QSettings needs HOME to find config | Deploy | 2026-02-03 |
+| appController.quit() not Qt.quit() | Qt.quit() doesn't work on embedded; QCoreApplication::quit() via controller works | Deploy | 2026-02-03 |
+| BusyBox compat in launcher scripts | Device uses BusyBox; head -n 1 not head -1, /bin/sh not /bin/bash | Deploy | 2026-02-03 |
 
 ### Open Questions
 
@@ -143,10 +148,10 @@ None
 **Quick Context for Next Session:**
 - **Phase 1 complete:** App displays Todoist tasks on device
 - **Phase 2 complete:** Task completion with optimistic UI and background sync
-- **Build:** On-device compilation (cross-compilation not working due to Qt6 library mismatch)
-- **Deployment:** Two options implemented:
-  1. `launcher/` - Notebook-based launcher for stock firmware (inotifywait watches for "Launch Todoist" notebook)
-  2. `oxide/` - Standard Oxide integration for Toltec users
+- **Phase 2 deployed and verified on device** (2026-02-03)
+- **Build:** Cross-compilation on arm64 host using `build-rm.sh` with device sysroot at `/tmp/rm-sysroot`
+- **Deploy:** `scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/`
+- **Launcher:** Notebook-based launcher on stock firmware (minimal static inotifywait, 15s boot delay)
 
 **Phase 2 Complete:**
 - 02-01 - Task completion building blocks (Wave 1)
