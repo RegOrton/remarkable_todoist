@@ -59,6 +59,26 @@ void TodoistClient::closeTask(const QString& taskId)
     connect(reply, &QNetworkReply::finished, this, &TodoistClient::onCloseTaskReplyFinished);
 }
 
+void TodoistClient::createTask(const QString& content)
+{
+    qDebug() << "Creating task via Todoist API:" << content;
+
+    QUrl url(TASKS_ENDPOINT);
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_apiToken).toUtf8());
+    request.setRawHeader("Content-Type", "application/json");
+    request.setTransferTimeout(REQUEST_TIMEOUT_MS);
+
+    // Build JSON body
+    QJsonObject jsonObj;
+    jsonObj["content"] = content;
+    QJsonDocument doc(jsonObj);
+    QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
+
+    QNetworkReply* reply = m_networkManager->post(request, jsonData);
+    connect(reply, &QNetworkReply::finished, this, &TodoistClient::onCreateTaskReplyFinished);
+}
+
 void TodoistClient::onTasksReplyFinished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
@@ -196,6 +216,71 @@ void TodoistClient::onCloseTaskReplyFinished()
         QString errorMsg = QString("Unexpected status code: %1").arg(statusCode);
         qWarning() << "Close task" << taskId << "failed:" << errorMsg;
         emit closeTaskFailed(taskId, errorMsg);
+    }
+
+    // Critical: prevent memory leak
+    reply->deleteLater();
+}
+
+void TodoistClient::onCreateTaskReplyFinished()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) {
+        qWarning() << "onCreateTaskReplyFinished called with invalid sender";
+        return;
+    }
+
+    // Extract content from request body for signal parameter
+    QByteArray requestData = reply->request().attribute(QNetworkRequest::CustomVerbAttribute).toByteArray();
+    QJsonDocument requestDoc = QJsonDocument::fromJson(reply->request().attribute(QNetworkRequest::User).toByteArray());
+    QString content;
+
+    // Check for network errors
+    if (reply->error() != QNetworkReply::NoError) {
+        QString errorMsg = handleNetworkError(reply);
+        qWarning() << "Create task failed:" << errorMsg;
+
+        // Try to extract content from reply readAll (in case of server response)
+        QByteArray responseData = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(responseData);
+        if (doc.isObject() && doc.object().contains("content")) {
+            content = doc.object()["content"].toString();
+        }
+
+        emit createTaskFailed(content, errorMsg);
+        reply->deleteLater();
+        return;
+    }
+
+    // Parse JSON response
+    QByteArray responseData = reply->readAll();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(responseData, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        QString errorMsg = QString("Failed to parse create task response: %1").arg(parseError.errorString());
+        qWarning() << errorMsg;
+        emit createTaskFailed(content, errorMsg);
+        reply->deleteLater();
+        return;
+    }
+
+    // Check for HTTP 200 status code (Todoist API returns 200, not 201)
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (statusCode == 200 && doc.isObject()) {
+        QJsonObject taskObj = doc.object();
+        QString newTaskId = taskObj["id"].toString();
+        content = taskObj["content"].toString();
+
+        qDebug() << "Successfully created task:" << content << "id:" << newTaskId;
+        emit taskCreated(content, newTaskId);
+    } else {
+        QString errorMsg = QString("Unexpected status code: %1").arg(statusCode);
+        qWarning() << "Create task failed:" << errorMsg;
+        if (doc.isObject() && doc.object().contains("content")) {
+            content = doc.object()["content"].toString();
+        }
+        emit createTaskFailed(content, errorMsg);
     }
 
     // Critical: prevent memory leak

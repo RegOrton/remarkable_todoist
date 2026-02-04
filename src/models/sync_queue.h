@@ -8,8 +8,10 @@
 
 struct SyncOperation {
     QString uuid;           // Unique ID for idempotency (QUuid::createUuid())
-    QString type;           // "close_task" for now
-    QString taskId;         // Target task ID
+    QString type;           // "close_task" or "create_task"
+    QString taskId;         // Target task ID (empty for create_task until server responds)
+    QString content;        // Task name for create_task operations
+    QString tempId;         // Temporary ID for tracking optimistic UI entries
     QDateTime queuedAt;     // When queued
     int retryCount;         // Number of sync attempts
 

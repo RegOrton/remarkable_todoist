@@ -57,6 +57,14 @@ public:
      */
     void closeTask(const QString& taskId);
 
+    /**
+     * @brief Create a new task in Todoist
+     * @param content The task name/content
+     *
+     * Emits taskCreated() on success or createTaskFailed() on failure.
+     */
+    void createTask(const QString& content);
+
 signals:
     /**
      * @brief Emitted when tasks have been successfully fetched
@@ -89,10 +97,25 @@ signals:
      */
     void closeTaskFailed(const QString& taskId, const QString& error);
 
+    /**
+     * @brief Emitted when a task has been successfully created
+     * @param content The content of the created task
+     * @param newTaskId The server-assigned task ID
+     */
+    void taskCreated(const QString& content, const QString& newTaskId);
+
+    /**
+     * @brief Emitted when creating a task fails
+     * @param content The content of the task that failed to create
+     * @param error User-friendly error message
+     */
+    void createTaskFailed(const QString& content, const QString& error);
+
 private slots:
     void onTasksReplyFinished();
     void onProjectsReplyFinished();
     void onCloseTaskReplyFinished();
+    void onCreateTaskReplyFinished();
 
 private:
     QString handleNetworkError(QNetworkReply* reply);
