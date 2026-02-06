@@ -98,6 +98,8 @@ void SyncQueue::saveToFile()
         jsonObj["uuid"] = op.uuid;
         jsonObj["type"] = op.type;
         jsonObj["taskId"] = op.taskId;
+        jsonObj["content"] = op.content;
+        jsonObj["tempId"] = op.tempId;
         jsonObj["queuedAt"] = op.queuedAt.toString(Qt::ISODate);
         jsonObj["retryCount"] = op.retryCount;
         jsonArray.append(jsonObj);
@@ -163,6 +165,8 @@ void SyncQueue::loadFromFile()
         op.uuid = jsonObj["uuid"].toString();
         op.type = jsonObj["type"].toString();
         op.taskId = jsonObj["taskId"].toString();
+        op.content = jsonObj["content"].toString();
+        op.tempId = jsonObj["tempId"].toString();
         op.queuedAt = QDateTime::fromString(jsonObj["queuedAt"].toString(), Qt::ISODate);
         op.retryCount = jsonObj["retryCount"].toInt();
 
