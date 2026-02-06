@@ -26,6 +26,9 @@ public:
     // Queue a task completion operation
     void queueTaskCompletion(const QString& taskId);
 
+    // Queue a task creation operation
+    void queueTaskCreation(const QString& content, const QString& tempId);
+
     // Process pending operations (call when you think we're online)
     void processQueue();
 
@@ -35,10 +38,14 @@ signals:
     void isSyncingChanged();
     void syncSucceeded(const QString& taskId);
     void syncFailed(const QString& taskId, const QString& error);
+    void taskCreateSynced(const QString& tempId, const QString& serverTaskId);
+    void taskCreateSyncFailed(const QString& tempId, const QString& error);
 
 private slots:
     void onTaskClosed(const QString& taskId);
     void onCloseTaskFailed(const QString& taskId, const QString& error);
+    void onTaskCreated(const QString& content, const QString& newTaskId);
+    void onCreateTaskFailed(const QString& content, const QString& error);
     void onReachabilityChanged();
     void processNextOperation();
 
@@ -55,6 +62,7 @@ private:
     bool m_isSyncing;
     bool m_useNetworkInfo;        // Whether QNetworkInformation is available
     QString m_currentSyncTaskId;  // Task currently being synced
+    QString m_currentSyncContent; // Content of current sync operation (for create_task)
 };
 
 #endif // SYNC_MANAGER_H
