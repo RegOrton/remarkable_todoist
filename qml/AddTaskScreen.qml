@@ -164,9 +164,11 @@ Item {
                     text: "Recognize"
                     enabled: !drawingCanvas.isEmpty() && !recognizing
                     onClicked: {
-                        // Parent will handle recognition
-                        // This just signals that the button was clicked
-                        // Parent should set recognizing=true, call OCR, then set recognizedText
+                        recognizing = true
+                        canvas.save("/tmp/remarkable-todoist-canvas.png")
+                        var result = appController.recognizeHandwriting("/tmp/remarkable-todoist-canvas.png")
+                        recognizedText = result
+                        recognizing = false
                     }
 
                     contentItem: Text {
