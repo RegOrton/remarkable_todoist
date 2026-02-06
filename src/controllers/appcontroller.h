@@ -6,6 +6,7 @@
 #include <QVector>
 #include "../models/task.h"
 #include "../network/sync_manager.h"
+#include "../ocr/handwriting_recognizer.h"
 
 class TodoistClient;
 class TaskModel;
@@ -60,6 +61,16 @@ public slots:
     Q_INVOKABLE void completeTask(const QString& taskId);
 
     /**
+     * Create a new task (optimistic update + queue for sync)
+     */
+    Q_INVOKABLE void createTask(const QString& content);
+
+    /**
+     * Recognize handwriting from an image file
+     */
+    Q_INVOKABLE QString recognizeHandwriting(const QString& imagePath);
+
+    /**
      * Quit the application
      */
     Q_INVOKABLE void quit();
@@ -67,6 +78,7 @@ public slots:
 signals:
     void loadingChanged();
     void errorMessageChanged();
+    void taskCreated();
 
 private slots:
     void onProjectsFetched(const QMap<QString, QString>& projects);
@@ -85,6 +97,7 @@ private:
     TaskModel* m_taskModel;
     TodoistClient* m_todoistClient;
     SyncManager* m_syncManager;
+    HandwritingRecognizer* m_recognizer;
 };
 
 #endif // APPCONTROLLER_H

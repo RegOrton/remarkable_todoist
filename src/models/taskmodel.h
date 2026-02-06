@@ -31,6 +31,7 @@ public:
     const Task& taskAt(int row) const;
     int taskCount() const;
     void setTaskCompleted(const QString& taskId, bool completed);
+    void addTask(const Task& task);  // Add a single task to the top of the list
 
 private:
     QVector<Task> m_tasks;

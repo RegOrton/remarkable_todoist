@@ -93,3 +93,10 @@ void TaskModel::setTaskCompleted(const QString& taskId, bool completed)
     // Task not found - this is OK (might have been deleted elsewhere)
     qDebug() << "setTaskCompleted: Task" << taskId << "not found in model";
 }
+
+void TaskModel::addTask(const Task& task)
+{
+    beginInsertRows(QModelIndex(), 0, 0);  // Insert at top
+    m_tasks.prepend(task);
+    endInsertRows();
+}

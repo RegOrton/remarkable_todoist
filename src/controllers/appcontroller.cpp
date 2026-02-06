@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QUuid>
 
 #include "../models/task.h"
 #include "../models/taskmodel.h"
@@ -16,9 +17,13 @@ AppController::AppController(QObject *parent)
     , m_taskModel(nullptr)
     , m_todoistClient(nullptr)
     , m_syncManager(nullptr)
+    , m_recognizer(nullptr)
 {
     // Create task model
     m_taskModel = new TaskModel(this);
+
+    // Create handwriting recognizer
+    m_recognizer = new HandwritingRecognizer(this);
 }
 
 AppController::~AppController()
@@ -52,6 +57,11 @@ void AppController::initialize()
     // Create SyncManager after TodoistClient
     m_syncManager = new SyncManager(m_todoistClient, this);
 
+    // Initialize handwriting recognizer
+    if (!m_recognizer->initialize()) {
+        qWarning() << "Handwriting recognizer initialization failed (OCR may not work)";
+    }
+
     // Connect signals
     connect(m_todoistClient, &TodoistClient::projectsFetched,
             this, &AppController::onProjectsFetched);
@@ -59,6 +69,12 @@ void AppController::initialize()
             this, &AppController::onTasksFetched);
     connect(m_todoistClient, &TodoistClient::errorOccurred,
             this, &AppController::onError);
+
+    // Connect SyncManager signals for task creation feedback
+    connect(m_syncManager, &SyncManager::taskCreateSynced,
+            this, [this](const QString& tempId, const QString& serverTaskId) {
+        qDebug() << "Task synced, tempId:" << tempId << "-> serverId:" << serverTaskId;
+    });
 
     // Start fetch flow: projects first, then tasks
     refresh();
@@ -132,4 +148,40 @@ void AppController::completeTask(const QString& taskId)
 
     // Queue for sync
     m_syncManager->queueTaskCompletion(taskId);
+}
+
+void AppController::createTask(const QString& content)
+{
+    if (content.trimmed().isEmpty()) {
+        qWarning() << "Cannot create task with empty content";
+        return;
+    }
+
+    // Generate temp ID for optimistic UI tracking
+    QString tempId = "temp_" + QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    // Optimistic UI: add task to model immediately
+    Task newTask;
+    newTask.id = tempId;
+    newTask.title = content.trimmed();
+    newTask.priority = 1;  // Default priority
+    newTask.completed = false;
+    m_taskModel->addTask(newTask);
+
+    // Queue for sync
+    m_syncManager->queueTaskCreation(content.trimmed(), tempId);
+
+    emit taskCreated();
+    qDebug() << "Task created (optimistic):" << content << "tempId:" << tempId;
+}
+
+QString AppController::recognizeHandwriting(const QString& imagePath)
+{
+    if (!m_recognizer || !m_recognizer->isReady()) {
+        qWarning() << "Handwriting recognizer not ready";
+        return QString();
+    }
+    QString result = m_recognizer->recognizeFile(imagePath);
+    qDebug() << "Recognized text:" << result;
+    return result;
 }
