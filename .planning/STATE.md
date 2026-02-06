@@ -10,7 +10,7 @@
 
 **Core Value:** View and manage Todoist tasks on the reMarkable 2 without needing a phone or computer
 
-**Current Focus:** Phase 3 Plan 01 complete - task creation API and sync backend
+**Current Focus:** Phase 3 Plan 02 complete - drawing canvas component with stylus input
 
 **Active Constraints:**
 - E-ink display (slow refresh, monochrome, high contrast required)
@@ -23,17 +23,17 @@
 ## Current Position
 
 **Phase:** 3 of 3 (Task Creation with Handwriting Input)
-**Plan:** 03-01 complete (1 of 4)
+**Plan:** 03-02 complete (2 of 4)
 **Status:** In Progress
-**Last activity:** 2026-02-06 - Completed 03-01-PLAN.md (Task creation backend)
+**Last activity:** 2026-02-06 - Completed 03-02-PLAN.md (Drawing canvas component)
 
 **Progress:** [██████████████████░░] 87.5% (7/8 plans delivered)
 
 **Phase Goal:** User can create tasks via handwriting input with offline-first sync
 
-**Active Requirements:** CREATE-01 (API integration) - IN PROGRESS
+**Active Requirements:** CREATE-01, CREATE-02 (Canvas) - IN PROGRESS
 
-**Next Milestone:** Phase 3 Plan 02 - Handwriting canvas for stylus input
+**Next Milestone:** Phase 3 Plan 03 - OCR integration
 
 ---
 
@@ -113,6 +113,9 @@
 | BusyBox compat in launcher scripts | Device uses BusyBox; head -n 1 not head -1, /bin/sh not /bin/bash | Deploy | 2026-02-03 |
 | tempId for optimistic UI | SyncOperation.tempId tracks task before server assigns real ID | 03-01 | 2026-02-06 |
 | POST /tasks returns HTTP 200 | Todoist REST API v2 returns 200 with full task JSON, not 201 Created | 03-01 | 2026-02-06 |
+| MouseArea over PointHandler | Simpler API for stylus input, works reliably with reMarkable evdev | 03-02 | 2026-02-06 |
+| Redraw all strokes on paint | QML Canvas doesn't retain drawn content; simpler than render strategies | 03-02 | 2026-02-06 |
+| 3px line width for handwriting | Good balance for stylus input on 1404px display | 03-02 | 2026-02-06 |
 
 ### Open Questions
 
@@ -139,7 +142,7 @@ None
 - [x] Execute 02-03-PLAN.md (SyncManager orchestration)
 - [x] Execute 02-04-PLAN.md (UI integration) - **PASSED: 18 tasks, completion synced to API**
 - [x] Execute 03-01-PLAN.md (Task creation backend) - **COMPLETE**
-- [ ] Execute 03-02-PLAN.md (Handwriting canvas)
+- [x] Execute 03-02-PLAN.md (Drawing canvas) - **COMPLETE**
 - [ ] Execute 03-03-PLAN.md (OCR integration)
 - [ ] Execute 03-04-PLAN.md (UI integration for task creation)
 
@@ -147,14 +150,14 @@ None
 
 ## Session Continuity
 
-**Last Session:** 2026-02-06 - Phase 3 Plan 01 completion
-**Stopped at:** Completed 03-01-PLAN.md (Task creation backend)
+**Last Session:** 2026-02-06 - Phase 3 Plan 02 completion
+**Stopped at:** Completed 03-02-PLAN.md (Drawing canvas component)
 **Resume file:** None
 
 **Quick Context for Next Session:**
 - **Phase 1 complete:** App displays Todoist tasks on device
 - **Phase 2 complete:** Task completion with optimistic UI and background sync
-- **Phase 3 in progress:** Task creation backend complete (Plan 01)
+- **Phase 3 in progress:** Plans 01-02 complete (2 of 4)
 - **Build:** Cross-compilation on arm64 host using `build-rm.sh` with device sysroot at `/tmp/rm-sysroot`
 - **Deploy:** `scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/`
 - **Launcher:** Notebook-based launcher on stock firmware (minimal static inotifywait, 15s boot delay)
@@ -165,9 +168,13 @@ None
   - SyncOperation extended with content and tempId fields
   - SyncManager.queueTaskCreation() with same offline-first patterns
   - taskCreateSynced/taskCreateSyncFailed signals for UI binding
+- 03-02 - Drawing canvas component (Wave 1) - **COMPLETE**
+  - DrawingCanvas.qml with Canvas/MouseArea
+  - Stroke capture and rendering (black on white, 3px)
+  - save()/grabToImage() for PNG export
+  - clear()/isEmpty() for UI control
 
 **Next Steps:**
-- Phase 3 Plan 02: Handwriting canvas for stylus input
 - Phase 3 Plan 03: OCR integration (MyScript or on-device)
 - Phase 3 Plan 04: Wire handwriting to task creation API
 
