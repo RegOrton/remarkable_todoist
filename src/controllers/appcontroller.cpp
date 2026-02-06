@@ -18,13 +18,17 @@ AppController::AppController(QObject *parent)
     , m_taskModel(nullptr)
     , m_todoistClient(nullptr)
     , m_syncManager(nullptr)
+#ifdef ENABLE_OCR
     , m_recognizer(nullptr)
+#endif
 {
     // Create task model
     m_taskModel = new TaskModel(this);
 
+#ifdef ENABLE_OCR
     // Create handwriting recognizer
     m_recognizer = new HandwritingRecognizer(this);
+#endif
 }
 
 AppController::~AppController()
@@ -58,10 +62,14 @@ void AppController::initialize()
     // Create SyncManager after TodoistClient
     m_syncManager = new SyncManager(m_todoistClient, this);
 
+#ifdef ENABLE_OCR
     // Initialize handwriting recognizer
     if (!m_recognizer->initialize()) {
         qWarning() << "Handwriting recognizer initialization failed (OCR may not work)";
     }
+#else
+    qDebug() << "OCR support not compiled - handwriting recognition unavailable";
+#endif
 
     // Connect signals
     connect(m_todoistClient, &TodoistClient::projectsFetched,
@@ -180,6 +188,7 @@ QString AppController::recognizeHandwriting(const QString& imagePath)
 {
     qDebug() << "recognizeHandwriting called with path:" << imagePath;
 
+#ifdef ENABLE_OCR
     if (!m_recognizer || !m_recognizer->isReady()) {
         qWarning() << "Handwriting recognizer not ready";
         return QString("ERROR: Recognizer not ready");
@@ -206,4 +215,9 @@ QString AppController::recognizeHandwriting(const QString& imagePath)
     }
 
     return result;
+#else
+    Q_UNUSED(imagePath);
+    qWarning() << "OCR not available - app was built without Tesseract support";
+    return QString("ERROR: OCR not available - app built without handwriting recognition support");
+#endif
 }

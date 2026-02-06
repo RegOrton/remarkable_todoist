@@ -6,7 +6,11 @@
 #include <QVector>
 #include "../models/task.h"
 #include "../network/sync_manager.h"
+
+// OCR support is optional - only include if libraries are available
+#ifdef ENABLE_OCR
 #include "../ocr/handwriting_recognizer.h"
+#endif
 
 class TodoistClient;
 class TaskModel;
@@ -97,7 +101,10 @@ private:
     TaskModel* m_taskModel;
     TodoistClient* m_todoistClient;
     SyncManager* m_syncManager;
+
+#ifdef ENABLE_OCR
     HandwritingRecognizer* m_recognizer;
+#endif
 };
 
 #endif // APPCONTROLLER_H

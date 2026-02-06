@@ -1,254 +1,171 @@
 # Building Remarkable Todoist
 
-This document describes how to build Remarkable Todoist for both desktop development and the reMarkable 2 device.
+This document explains how to build the app for reMarkable 2.
 
 ## Quick Start
 
 ```bash
-# Desktop development (testing on your computer)
-./build.sh desktop run
-
-# Cross-compile for reMarkable device
+# Build for reMarkable (automatically sets up sysroot if needed)
 ./build.sh remarkable
 
 # Deploy to device
 ./build.sh remarkable deploy
 ```
 
+## Prerequisites
+
+### On Build Machine (arm64 Linux)
+
+1. **ARM Cross-Compiler**
+   ```bash
+   sudo apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+   ```
+
+2. **Qt6 Development Tools**
+   ```bash
+   sudo apt install qt6-base-dev-tools
+   ```
+   This provides `moc` and `rcc` tools needed for Qt compilation.
+
+### On reMarkable Device
+
+1. **Device Connection**
+   - USB: Device appears at `10.11.99.1` (default)
+   - WiFi: Check device settings for IP address
+
+2. **SSH Access**
+   - Password from Settings → Help → Copyrights and licenses → GPLv3 Compliance
+
+## Build Process
+
+### Automatic Setup (Recommended)
+
+The build script automatically handles sysroot setup:
+
+```bash
+./build.sh remarkable
+```
+
+This will:
+1. Check if sysroot exists at `/tmp/rm-sysroot`
+2. If missing, automatically pull libraries from device
+3. Create necessary linker symlinks
+4. Detect available optional libraries (OCR)
+5. Build with appropriate features enabled
+
+### Manual Sysroot Setup
+
+If you prefer manual setup or encounter issues:
+
+```bash
+./scripts/pull-sysroot.sh [device_ip]
+```
+
+This creates `/tmp/rm-sysroot` with:
+- Device libraries from `/usr/lib` and `/lib`
+- Proper `.so` symlinks for linking
+- Verification of critical libraries
+
+## Optional Features
+
+### OCR / Handwriting Recognition
+
+The app can be built with or without OCR support:
+
+**Without OCR (default):**
+- Build succeeds if Tesseract libraries are missing on device
+- App displays clear error message when OCR features are accessed
+- Phases 1 & 2 (task viewing, completion, sync) work perfectly
+
+**With OCR:**
+- Requires `libtesseract` and `liblept` on reMarkable device
+- Enables Phase 3 (handwriting-based task creation)
+- Automatically detected and enabled if libraries found in sysroot
+
+To add OCR support:
+1. Install Tesseract on device (via Toltec or custom build)
+2. Re-pull sysroot: `./scripts/pull-sysroot.sh`
+3. Rebuild: `./build.sh remarkable clean`
+
 ## Build Targets
 
-### Desktop Build
-
-Build and run on your local machine for development and testing.
-
+### reMarkable (Production)
 ```bash
-# Build only
-./build.sh desktop
-
-# Build and run
-./build.sh desktop run
-
-# Clean and rebuild
-./build.sh desktop clean
+./build.sh remarkable          # Build only
+./build.sh remarkable deploy   # Build and deploy
+./build.sh remarkable clean    # Clean and rebuild
 ```
 
-Or use the direct script:
+Produces: `build-rm/remarkable-todoist` (~254KB ARM32)
+
+### Desktop (Testing)
 ```bash
-./build-desktop.sh          # Build
-./build-desktop.sh run      # Build and run
-./build-desktop.sh clean    # Clean and rebuild
+./build.sh desktop             # Build only
+./build.sh desktop run         # Build and run
+./build.sh desktop clean       # Clean and rebuild
 ```
 
-**Requirements:**
-- CMake 3.16+
-- Qt6 (Quick, QML, Network, Controls)
-- Tesseract OCR (libtesseract-dev)
-- Leptonica (libleptonica-dev)
-- C++17 compiler
-
-**Install dependencies (Debian/Ubuntu):**
-```bash
-sudo apt install cmake build-essential \
-    qt6-base-dev qt6-declarative-dev \
-    libtesseract-dev libleptonica-dev \
-    tesseract-ocr-eng
-```
-
-### reMarkable Build
-
-Cross-compile for the reMarkable 2 device (ARM32).
-
-```bash
-# Build only
-./build.sh remarkable
-
-# Build and deploy to device
-./build.sh remarkable deploy
-
-# Clean and rebuild
-./build.sh remarkable clean
-```
-
-Or use the direct script:
-```bash
-./build-remarkable.sh          # Build
-./build-remarkable.sh deploy   # Build and deploy
-./build-remarkable.sh clean    # Clean and rebuild
-```
-
-**Requirements:**
-- ARM cross-compiler (`arm-linux-gnueabihf-g++`)
-- Qt6 development tools (moc, rcc)
-- Device sysroot at `/tmp/rm-sysroot`
-
-**Install cross-compiler (Debian/Ubuntu):**
-```bash
-sudo apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-```
-
-**Set up sysroot:**
-
-The sysroot contains libraries from your reMarkable device needed for linking.
-
-1. Connect your reMarkable via USB
-2. Run the sysroot pull script (if available):
-   ```bash
-   ./scripts/pull-sysroot.sh
-   ```
-
-   Or manually:
-   ```bash
-   mkdir -p /tmp/rm-sysroot
-   ssh root@10.11.99.1 "tar czf - /usr/lib/*.so* /lib/*.so*" | \
-       tar xzf - -C /tmp/rm-sysroot/
-   ```
-
-### Build All
-
-Build both desktop and reMarkable versions:
-
-```bash
-./build.sh all
-```
-
-### Clean All
-
-Remove all build directories:
-
-```bash
-./build.sh clean
-```
-
-## Build Output
-
-### Desktop Build
-- Binary: `build/remarkable-todoist`
-- Run directly: `./build/remarkable-todoist`
-
-### reMarkable Build
-- Binary: `build-rm/remarkable-todoist`
-- Architecture: ARM 32-bit
-- Deploy: `scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/`
-
-## Environment Variables
-
-### REMARKABLE_IP
-
-Set the IP address of your reMarkable device (default: `10.11.99.1`):
-
-```bash
-export REMARKABLE_IP=10.11.99.2
-./build.sh remarkable deploy
-```
-
-Or inline:
-```bash
-REMARKABLE_IP=10.11.99.2 ./build.sh remarkable deploy
-```
-
-## Build System Structure
-
-```
-.
-├── build.sh                    # Master build script
-├── build-desktop.sh            # Desktop build script
-├── build-remarkable.sh         # reMarkable cross-compile script
-├── build-rm.sh                 # Legacy cross-compile script (simple)
-├── CMakeLists.txt              # CMake configuration (desktop)
-├── build/                      # Desktop build output
-└── build-rm/                   # reMarkable build output
-```
+Produces: `build/remarkable-todoist` (native arch)
 
 ## Troubleshooting
 
-### Desktop Build Issues
+### "Cannot reach device at 10.11.99.1"
 
-**Qt6 not found:**
-```bash
-sudo apt install qt6-base-dev qt6-declarative-dev
-```
+**Solutions:**
+1. Check USB connection
+2. Verify device IP in Settings
+3. Set custom IP: `export REMARKABLE_IP=192.168.x.x`
 
-**Tesseract not found:**
-```bash
-sudo apt install libtesseract-dev libleptonica-dev tesseract-ocr-eng
-```
+### "Cross-compiler not found"
 
-**Missing language data:**
-```bash
-sudo apt install tesseract-ocr-eng
-```
-
-### reMarkable Build Issues
-
-**Cross-compiler not found:**
+**Solution:**
 ```bash
 sudo apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 ```
 
-**Sysroot not found:**
-- Ensure your reMarkable is connected
-- Check IP address with `ping 10.11.99.1`
-- Re-run sysroot setup (see above)
+### "Qt MOC not found"
 
-**Qt tools not found:**
-- Qt6 development tools must be installed on the host
-- Check paths in `build-remarkable.sh` (MOC, RCC variables)
-
-**Linking errors:**
-- Verify sysroot contains Qt6 libraries
-- Check that device has Qt6 installed (reMarkable 3.x firmware)
-
-### Deployment Issues
-
-**Cannot connect to device:**
-- Ensure device is connected via USB
-- Check IP: `ping 10.11.99.1`
-- Verify SSH access: `ssh root@10.11.99.1`
-
-**Permission denied:**
+**Solution:**
 ```bash
-ssh root@10.11.99.1 "chmod +x /opt/bin/remarkable-todoist"
+sudo apt install qt6-base-dev-tools
 ```
 
-## Development Workflow
+### "Linking failed: cannot find -lQt6Core"
 
-1. **Make changes** to source code
-2. **Test on desktop:**
-   ```bash
-   ./build.sh desktop run
-   ```
-3. **Build for reMarkable:**
-   ```bash
-   ./build.sh remarkable
-   ```
-4. **Deploy and test on device:**
-   ```bash
-   ./build.sh remarkable deploy
-   ssh root@10.11.99.1 /opt/bin/remarkable-todoist
-   ```
+This means linker symlinks are missing. The build script automatically creates them.
 
-## CMake vs Manual Build
+**Solution:**
+```bash
+./scripts/pull-sysroot.sh  # Re-pull and create symlinks
+```
 
-### Desktop: CMake (Recommended)
+## Environment Variables
 
-The desktop build uses CMake for better IDE integration and dependency management.
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `REMARKABLE_IP` | `10.11.99.1` | Device IP address |
 
-**Advantages:**
-- Automatic dependency detection
-- IDE support (Qt Creator, CLion, VS Code)
-- Easier to maintain
+Example:
+```bash
+export REMARKABLE_IP=192.168.1.100
+./build.sh remarkable deploy
+```
 
-### reMarkable: Manual Build
+## Technical Details
 
-The reMarkable build uses a manual bash script for better control over cross-compilation.
+### Cross-Compilation Approach
 
-**Advantages:**
-- Full control over compiler flags
-- Easier to debug cross-compilation issues
-- No CMake toolchain file needed
+We use a hybrid approach:
+- **Host Qt tools** (`moc`, `rcc`) - version-independent
+- **Host Qt headers** - architecture-independent
+- **Device libraries** - actual runtime dependencies
+- **Cross-compiler** - ARM32 code generation
 
-## Further Reading
+This avoids needing a full cross-compilation SDK.
 
-- [README.md](README.md) - Project overview and setup
-- [.planning/ROADMAP.md](.planning/ROADMAP.md) - Project roadmap
-- [launcher/README.md](launcher/README.md) - Device launcher setup
+### Conditional Compilation
+
+OCR support is controlled by `ENABLE_OCR` preprocessor flag:
+- Defined automatically if Tesseract libraries found in sysroot
+- Controls compilation of `handwriting_recognizer.cpp`
+- Enables/disables OCR code paths at compile time

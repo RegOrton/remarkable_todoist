@@ -74,20 +74,92 @@ check_qt_tools() {
     echo_info "Found Qt tools: moc, rcc"
 }
 
+# Check for OCR libraries
+check_ocr_libraries() {
+    OCR_AVAILABLE=false
+
+    if [ -e "$SYSROOT/usr/lib/libtesseract.so" ] || [ -e "$SYSROOT/lib/libtesseract.so" ]; then
+        if [ -e "$SYSROOT/usr/lib/liblept.so" ] || [ -e "$SYSROOT/lib/liblept.so" ]; then
+            OCR_AVAILABLE=true
+            echo_info "OCR libraries found (Tesseract + Leptonica)"
+        fi
+    fi
+
+    if [ "$OCR_AVAILABLE" = false ]; then
+        echo_warn "OCR libraries not found - building without handwriting recognition"
+        echo "To add OCR support: install tesseract and leptonica on device, then rebuild"
+    fi
+}
+
 # Check sysroot
 check_sysroot() {
     if [ ! -d "$SYSROOT/usr/lib" ]; then
-        echo_error "Sysroot not found at $SYSROOT"
+        echo_warn "Sysroot not found at $SYSROOT"
         echo ""
-        echo "To set up the sysroot:"
-        echo "  1. Connect to reMarkable via USB"
-        echo "  2. Run: ./scripts/pull-sysroot.sh"
+        echo "Attempting to set up sysroot automatically..."
         echo ""
-        echo "Or manually:"
-        echo "  ssh root@10.11.99.1 \"tar czf - /usr/lib/*.so* /lib/*.so*\" | tar xzf - -C /tmp/rm-sysroot/"
-        exit 1
+
+        # Check if pull-sysroot script exists
+        if [ -f "$SCRIPT_DIR/scripts/pull-sysroot.sh" ]; then
+            "$SCRIPT_DIR/scripts/pull-sysroot.sh" "$DEVICE_IP"
+        else
+            echo_error "Cannot find scripts/pull-sysroot.sh"
+            echo ""
+            echo "Manual setup:"
+            echo "  1. Connect to reMarkable via USB"
+            echo "  2. Run: mkdir -p $SYSROOT"
+            echo "  3. Run: ssh root@$DEVICE_IP \"tar czf - /usr/lib/*.so* /lib/*.so*\" | tar xzf - -C $SYSROOT/"
+            exit 1
+        fi
+
+        # Verify sysroot was created
+        if [ ! -d "$SYSROOT/usr/lib" ]; then
+            echo_error "Sysroot setup failed"
+            exit 1
+        fi
     fi
     echo_info "Found sysroot at $SYSROOT"
+
+    # Verify critical symlinks exist
+    if [ ! -e "$SYSROOT/usr/lib/libQt6Core.so" ] && [ ! -e "$SYSROOT/lib/libQt6Core.so" ]; then
+        echo_warn "Linker symlinks missing, recreating..."
+        create_linker_symlinks
+    fi
+}
+
+# Create linker symlinks
+create_linker_symlinks() {
+    local created=0
+
+    # Create .so symlinks in /usr/lib
+    if [ -d "$SYSROOT/usr/lib" ]; then
+        cd "$SYSROOT/usr/lib"
+        for lib in *.so.*; do
+            [ -e "$lib" ] || continue
+            base=$(echo "$lib" | sed 's/\.so\..*/\.so/')
+            if [ ! -e "$base" ]; then
+                ln -s "$lib" "$base" 2>/dev/null || true
+                created=$((created + 1))
+            fi
+        done
+    fi
+
+    # Create .so symlinks in /lib
+    if [ -d "$SYSROOT/lib" ]; then
+        cd "$SYSROOT/lib"
+        for lib in *.so.*; do
+            [ -e "$lib" ] || continue
+            base=$(echo "$lib" | sed 's/\.so\..*/\.so/')
+            if [ ! -e "$base" ]; then
+                ln -s "$lib" "$base" 2>/dev/null || true
+                created=$((created + 1))
+            fi
+        done
+    fi
+
+    if [ $created -gt 0 ]; then
+        echo_info "Created $created linker symlinks"
+    fi
 }
 
 # Clean build directory
@@ -133,6 +205,12 @@ compile_sources() {
         -I$SYSROOT/usr/include \
         -Isrc"
 
+    # Add OCR flag if libraries are available
+    if [ "$OCR_AVAILABLE" = true ]; then
+        CXXFLAGS="$CXXFLAGS -DENABLE_OCR"
+    fi
+
+    # Base sources (always compiled)
     SOURCES="
         src/main.cpp
         src/models/task.cpp
@@ -142,7 +220,6 @@ compile_sources() {
         src/network/todoist_client.cpp
         src/network/sync_manager.cpp
         src/controllers/appcontroller.cpp
-        src/ocr/handwriting_recognizer.cpp
         $OUTDIR/moc_taskmodel.cpp
         $OUTDIR/moc_sync_queue.cpp
         $OUTDIR/moc_appcontroller.cpp
@@ -150,6 +227,12 @@ compile_sources() {
         $OUTDIR/moc_sync_manager.cpp
         $OUTDIR/qrc_qml.cpp
     "
+
+    # Add OCR sources if libraries are available
+    if [ "$OCR_AVAILABLE" = true ]; then
+        SOURCES="$SOURCES src/ocr/handwriting_recognizer.cpp"
+        echo_info "Including OCR support in build"
+    fi
 
     local count=0
     for src in $SOURCES; do
@@ -173,11 +256,16 @@ link_binary() {
         -Wl,--dynamic-linker=/lib/ld-linux-armhf.so.3 \
         -Wl,--allow-shlib-undefined"
 
+    # Base libraries (always required)
     LIBS="-lQt6Core -lQt6Gui -lQt6Network -lQt6Qml -lQt6Quick \
         -lQt6QuickControls2 -lQt6QuickTemplates2 \
         -lQt6DBus -lQt6QmlModels -lQt6QmlMeta -lQt6QmlWorkerScript \
-        -licuuc -licui18n -licudata \
-        -ltesseract -llept"
+        -licuuc -licui18n -licudata"
+
+    # Add OCR libraries if available
+    if [ "$OCR_AVAILABLE" = true ]; then
+        LIBS="$LIBS -ltesseract -llept"
+    fi
 
     $CXX $OBJS $LDFLAGS $LIBS -o $OUTDIR/remarkable-todoist
 
@@ -219,6 +307,7 @@ build() {
     check_cross_compiler
     check_qt_tools
     check_sysroot
+    check_ocr_libraries
 
     mkdir -p "$OUTDIR"
 
