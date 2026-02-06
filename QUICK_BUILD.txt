@@ -1,0 +1,65 @@
+REMARKABLE TODOIST - QUICK BUILD REFERENCE
+==========================================
+
+DESKTOP (Development/Testing)
+------------------------------
+Build:          ./build.sh desktop
+Run:            ./build.sh desktop run
+Clean:          ./build.sh desktop clean
+
+Binary:         build/remarkable-todoist
+
+
+REMARKABLE DEVICE (Production)
+-------------------------------
+Build:          ./build.sh remarkable
+Deploy:         ./build.sh remarkable deploy
+Clean:          ./build.sh remarkable clean
+
+Binary:         build-rm/remarkable-todoist
+
+Prerequisites:
+- ARM cross-compiler installed
+- Sysroot at /tmp/rm-sysroot
+- Device connected at 10.11.99.1
+
+
+BOTH PLATFORMS
+--------------
+Build all:      ./build.sh all
+Clean all:      ./build.sh clean
+Help:           ./build.sh --help
+
+
+INDIVIDUAL SCRIPTS
+------------------
+Desktop:        ./build-desktop.sh [build|run|clean]
+reMarkable:     ./build-remarkable.sh [build|deploy|clean]
+
+
+ENVIRONMENT
+-----------
+Device IP:      export REMARKABLE_IP=10.11.99.1
+
+
+QUICK SETUP
+-----------
+1. Install dependencies:
+   sudo apt install cmake build-essential qt6-base-dev qt6-declarative-dev \
+                    libtesseract-dev libleptonica-dev tesseract-ocr-eng \
+                    gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
+2. Set up sysroot (for reMarkable builds):
+   ssh root@10.11.99.1 "tar czf - /usr/lib/*.so* /lib/*.so*" | tar xzf - -C /tmp/rm-sysroot/
+
+3. Build and test on desktop:
+   ./build.sh desktop run
+
+4. Build for reMarkable:
+   ./build.sh remarkable
+
+5. Deploy to device:
+   ./build.sh remarkable deploy
+
+
+For detailed instructions, see BUILD.md
