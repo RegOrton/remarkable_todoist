@@ -105,11 +105,11 @@ Item {
             }
         }
 
-        // Drawing area (~1000px)
+        // Drawing area (reduced to make room for keyboard)
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredHeight: 1000
+            Layout.preferredHeight: 500
             color: backgroundColor
             border.color: borderColor
             border.width: 2
@@ -130,10 +130,10 @@ Item {
             }
         }
 
-        // Preview area (~200px)
+        // Preview/Input area (~250px)
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 200
+            Layout.preferredHeight: 250
             color: backgroundColor
             border.color: borderColor
             border.width: 2
@@ -144,56 +144,87 @@ Item {
                 spacing: 12
 
                 Text {
-                    text: "Recognized text:"
+                    text: "Task name:"
                     font.pixelSize: 20
                     color: mutedColor
                 }
 
-                Text {
-                    text: recognizing ? "Recognizing..." : (recognizedText || "No text recognized")
-                    font.pixelSize: 26
-                    font.bold: !recognizing && recognizedText
-                    color: recognizing ? mutedColor : textColor
+                // Text input field for typing
+                Rectangle {
                     Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
+                    Layout.preferredHeight: 60
+                    color: backgroundColor
+                    border.color: borderColor
+                    border.width: 2
+
+                    TextField {
+                        id: taskTextField
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        font.pixelSize: 24
+                        color: textColor
+                        placeholderText: "Type task name or use OCR..."
+                        background: Item {}
+
+                        onTextChanged: {
+                            recognizedText = text
+                        }
+                    }
                 }
 
-                Item { Layout.fillHeight: true }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
 
-                Button {
-                    text: "Recognize"
-                    enabled: !drawingCanvas.isEmpty() && !recognizing
-                    onClicked: {
-                        recognizing = true
-                        canvas.save("/tmp/remarkable-todoist-canvas.png")
-                        var result = appController.recognizeHandwriting("/tmp/remarkable-todoist-canvas.png")
-                        recognizedText = result
-                        recognizing = false
+                    Button {
+                        text: "Recognize Drawing"
+                        enabled: !drawingCanvas.isEmpty() && !recognizing
+                        Layout.fillWidth: true
+                        onClicked: {
+                            recognizing = true
+                            canvas.save("/tmp/remarkable-todoist-canvas.png")
+                            var result = appController.recognizeHandwriting("/tmp/remarkable-todoist-canvas.png")
+                            taskTextField.text = result
+                            recognizing = false
+                        }
+
+                        contentItem: Text {
+                            text: parent.text
+                            font.pixelSize: 20
+                            color: parent.enabled ? textColor : mutedColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        background: Rectangle {
+                            implicitHeight: 55
+                            color: parent.pressed ? "#e0e0e0" : backgroundColor
+                            border.color: parent.enabled ? borderColor : mutedColor
+                            border.width: 3
+                        }
                     }
 
-                    contentItem: Text {
-                        text: parent.text
-                        font.pixelSize: 24
-                        color: parent.enabled ? textColor : mutedColor
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    background: Rectangle {
-                        implicitWidth: 180
-                        implicitHeight: 60
-                        color: parent.pressed ? "#e0e0e0" : backgroundColor
-                        border.color: parent.enabled ? borderColor : mutedColor
-                        border.width: 3
+                    Text {
+                        text: recognizing ? "Processing..." : ""
+                        font.pixelSize: 18
+                        color: mutedColor
+                        visible: recognizing
                     }
                 }
             }
         }
 
-        // Action area (~150px)
+        // On-screen keyboard (~350px)
+        SimpleKeyboard {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 350
+            targetTextField: taskTextField
+        }
+
+        // Action area (~100px)
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            Layout.preferredHeight: 100
             color: backgroundColor
 
             Button {

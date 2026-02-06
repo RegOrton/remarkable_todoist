@@ -6,15 +6,19 @@ Item {
     // Public API
     signal cleared()
 
+    // Property that updates when strokes change
+    property bool hasStrokes: false
+
     function clear() {
         strokes = []
         currentStroke = []
+        hasStrokes = false
         canvas.requestPaint()
         cleared()
     }
 
     function isEmpty() {
-        return strokes.length === 0
+        return !hasStrokes
     }
 
     function save(filePath) {
@@ -43,7 +47,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 2  // Inside the border
 
-        property real lineWidth: 3
+        property real lineWidth: 8  // Increased from 3 for better OCR recognition
 
         onPaint: {
             var ctx = getContext("2d")
@@ -91,13 +95,14 @@ Item {
     MouseArea {
         anchors.fill: canvas
 
-        onPressed: {
+        onPressed: function(mouse) {
+            console.log("Mouse pressed at:", mouse.x, mouse.y)
             // Start new stroke
             currentStroke = [{x: mouse.x, y: mouse.y}]
             canvas.requestPaint()
         }
 
-        onPositionChanged: {
+        onPositionChanged: function(mouse) {
             // Add point to current stroke
             if (currentStroke.length > 0) {
                 currentStroke.push({x: mouse.x, y: mouse.y})
@@ -105,12 +110,15 @@ Item {
             }
         }
 
-        onReleased: {
+        onReleased: function(mouse) {
+            console.log("Mouse released, currentStroke length:", currentStroke.length)
             // Finalize stroke
             if (currentStroke.length > 0) {
                 // Add completed stroke to strokes array
                 var completedStroke = currentStroke
                 strokes.push(completedStroke)
+                hasStrokes = true  // Update property to trigger binding
+                console.log("Stroke added! Total strokes now:", strokes.length, "hasStrokes:", hasStrokes)
 
                 // Reset current stroke
                 currentStroke = []

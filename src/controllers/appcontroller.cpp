@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QUuid>
+#include <QFileInfo>
 
 #include "../models/task.h"
 #include "../models/taskmodel.h"
@@ -177,11 +178,32 @@ void AppController::createTask(const QString& content)
 
 QString AppController::recognizeHandwriting(const QString& imagePath)
 {
+    qDebug() << "recognizeHandwriting called with path:" << imagePath;
+
     if (!m_recognizer || !m_recognizer->isReady()) {
         qWarning() << "Handwriting recognizer not ready";
-        return QString();
+        return QString("ERROR: Recognizer not ready");
     }
+
+    // Check if file exists and is readable
+    QFileInfo fileInfo(imagePath);
+    if (!fileInfo.exists()) {
+        qWarning() << "Image file does not exist:" << imagePath;
+        return QString("ERROR: Image file not found");
+    }
+    if (!fileInfo.isReadable()) {
+        qWarning() << "Image file not readable:" << imagePath;
+        return QString("ERROR: Image file not readable");
+    }
+
+    qDebug() << "Image file found, size:" << fileInfo.size() << "bytes";
+
     QString result = m_recognizer->recognizeFile(imagePath);
     qDebug() << "Recognized text:" << result;
+
+    if (result.isEmpty()) {
+        return QString("No text detected - try writing larger and clearer");
+    }
+
     return result;
 }

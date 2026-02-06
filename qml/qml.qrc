@@ -4,5 +4,6 @@
         <file>TaskDelegate.qml</file>
         <file>DrawingCanvas.qml</file>
         <file>AddTaskScreen.qml</file>
+        <file>SimpleKeyboard.qml</file>
     </qresource>
 </RCC>

@@ -9,6 +9,9 @@
 
 int main(int argc, char *argv[])
 {
+    // Enable virtual keyboard before creating QGuiApplication
+    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+
     QGuiApplication app(argc, argv);
 
     // Set application identity (for QSettings)
