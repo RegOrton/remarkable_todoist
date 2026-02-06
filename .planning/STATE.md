@@ -10,7 +10,7 @@
 
 **Core Value:** View and manage Todoist tasks on the reMarkable 2 without needing a phone or computer
 
-**Current Focus:** Phase 3 Plan 02 complete - drawing canvas component with stylus input
+**Current Focus:** Phase 3 Plan 03 complete - OCR integration with Tesseract
 
 **Active Constraints:**
 - E-ink display (slow refresh, monochrome, high contrast required)
@@ -23,17 +23,17 @@
 ## Current Position
 
 **Phase:** 3 of 3 (Task Creation with Handwriting Input)
-**Plan:** 03-02 complete (2 of 4)
+**Plan:** 03-03 complete (3 of 4)
 **Status:** In Progress
-**Last activity:** 2026-02-06 - Completed 03-02-PLAN.md (Drawing canvas component)
+**Last activity:** 2026-02-06 - Completed 03-03-PLAN.md (OCR integration)
 
-**Progress:** [██████████████████░░] 87.5% (7/8 plans delivered)
+**Progress:** [███████████████████░] 93.75% (8/8 plans delivered, 1 remaining task)
 
 **Phase Goal:** User can create tasks via handwriting input with offline-first sync
 
-**Active Requirements:** CREATE-01, CREATE-02 (Canvas) - IN PROGRESS
+**Active Requirements:** CREATE-01, CREATE-02 - COMPLETE; CREATE-03 (OCR) - COMPLETE
 
-**Next Milestone:** Phase 3 Plan 03 - OCR integration
+**Next Milestone:** Phase 3 Plan 04 - UI integration (final plan)
 
 ---
 
@@ -53,11 +53,11 @@
 
 **Plans:**
 - Total: 8 (across all phases)
-- Completed: 7
+- Completed: 8
 - In Progress: 0
-- Pending: 1
+- Pending: 0
 
-**Velocity:** 7 min/plan (7 data points: 16 + 11 + 3 + 2 + 2 + 8 + 8 = 50 min / 7 plans)
+**Velocity:** 32 min/plan (8 data points: 16 + 11 + 3 + 2 + 2 + 8 + 8 + 99 = 149 min / 8 plans = 18.6 min/plan average)
 
 ---
 
@@ -116,6 +116,10 @@
 | MouseArea over PointHandler | Simpler API for stylus input, works reliably with reMarkable evdev | 03-02 | 2026-02-06 |
 | Redraw all strokes on paint | QML Canvas doesn't retain drawn content; simpler than render strategies | 03-02 | 2026-02-06 |
 | 3px line width for handwriting | Good balance for stylus input on 1404px display | 03-02 | 2026-02-06 |
+| Opaque void* pointer for TessBaseAPI | Avoids exposing Tesseract headers to all files; cast only in .cpp | 03-03 | 2026-02-06 |
+| PSM_SINGLE_LINE mode | Task names typically single line; better OCR accuracy than multi-line | 03-03 | 2026-02-06 |
+| Recognize button separate from Submit | User reviews OCR output before submission; can retry if incorrect | 03-03 | 2026-02-06 |
+| Canvas alias property pattern | Parent can grab image without tight coupling; maintains encapsulation | 03-03 | 2026-02-06 |
 
 ### Open Questions
 
@@ -143,24 +147,25 @@ None
 - [x] Execute 02-04-PLAN.md (UI integration) - **PASSED: 18 tasks, completion synced to API**
 - [x] Execute 03-01-PLAN.md (Task creation backend) - **COMPLETE**
 - [x] Execute 03-02-PLAN.md (Drawing canvas) - **COMPLETE**
-- [ ] Execute 03-03-PLAN.md (OCR integration)
+- [x] Execute 03-03-PLAN.md (OCR integration) - **COMPLETE**
 - [ ] Execute 03-04-PLAN.md (UI integration for task creation)
 
 ---
 
 ## Session Continuity
 
-**Last Session:** 2026-02-06 - Phase 3 Plan 02 completion
-**Stopped at:** Completed 03-02-PLAN.md (Drawing canvas component)
+**Last Session:** 2026-02-06 - Phase 3 Plan 03 completion
+**Stopped at:** Completed 03-03-PLAN.md (OCR integration)
 **Resume file:** None
 
 **Quick Context for Next Session:**
 - **Phase 1 complete:** App displays Todoist tasks on device
 - **Phase 2 complete:** Task completion with optimistic UI and background sync
-- **Phase 3 in progress:** Plans 01-02 complete (2 of 4)
+- **Phase 3 in progress:** Plans 01-03 complete (3 of 4)
 - **Build:** Cross-compilation on arm64 host using `build-rm.sh` with device sysroot at `/tmp/rm-sysroot`
 - **Deploy:** `scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/`
 - **Launcher:** Notebook-based launcher on stock firmware (minimal static inotifywait, 15s boot delay)
+- **Build note:** Tesseract OCR now required - desktop needs `libtesseract-dev libleptonica-dev tesseract-ocr-eng`
 
 **Phase 3 Progress:**
 - 03-01 - Task creation backend (Wave 1) - **COMPLETE**
@@ -173,10 +178,15 @@ None
   - Stroke capture and rendering (black on white, 3px)
   - save()/grabToImage() for PNG export
   - clear()/isEmpty() for UI control
+- 03-03 - OCR integration (Wave 2) - **COMPLETE**
+  - HandwritingRecognizer C++ class wrapping Tesseract
+  - initialize() with English model, PSM_SINGLE_LINE mode
+  - recognizeImage(QImage) and recognizeFile(QString)
+  - AddTaskScreen.qml with canvas, text preview, action buttons
+  - Recognize button lets user review OCR before submission
 
 **Next Steps:**
-- Phase 3 Plan 03: OCR integration (MyScript or on-device)
-- Phase 3 Plan 04: Wire handwriting to task creation API
+- Phase 3 Plan 04: Wire AddTaskScreen to AppController and main.qml navigation (final plan)
 
 ---
 
