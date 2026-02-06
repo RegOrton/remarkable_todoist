@@ -1,8 +1,8 @@
 # Project State: Remarkable Todoist
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-06
 **Phase:** 3 - Task Creation
-**Status:** Planned
+**Status:** In Progress
 
 ---
 
@@ -10,7 +10,7 @@
 
 **Core Value:** View and manage Todoist tasks on the reMarkable 2 without needing a phone or computer
 
-**Current Focus:** Phase 2 complete - task completion with sync queue and background sync
+**Current Focus:** Phase 3 Plan 01 complete - task creation API and sync backend
 
 **Active Constraints:**
 - E-ink display (slow refresh, monochrome, high contrast required)
@@ -22,18 +22,18 @@
 
 ## Current Position
 
-**Phase:** 2 of 3 (Sync & Task Completion)
-**Plan:** 02-04 complete (4 of 4)
-**Status:** Phase Complete
-**Last activity:** 2026-02-02 - Completed 02-04-PLAN.md (UI integration and visual verification)
+**Phase:** 3 of 3 (Task Creation with Handwriting Input)
+**Plan:** 03-01 complete (1 of 4)
+**Status:** In Progress
+**Last activity:** 2026-02-06 - Completed 03-01-PLAN.md (Task creation backend)
 
-**Progress:** [████████████████████] 75% (6/8 plans delivered)
+**Progress:** [██████████████████░░] 87.5% (7/8 plans delivered)
 
-**Phase Goal:** User can complete tasks offline with automatic background sync
+**Phase Goal:** User can create tasks via handwriting input with offline-first sync
 
-**Active Requirements:** SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03 - ALL COMPLETE
+**Active Requirements:** CREATE-01 (API integration) - IN PROGRESS
 
-**Next Milestone:** Phase 3 - Task Creation with Handwriting Input
+**Next Milestone:** Phase 3 Plan 02 - Handwriting canvas for stylus input
 
 ---
 
@@ -42,22 +42,22 @@
 **Requirements:**
 - Total v1: 15
 - Completed: 6 (SYNC-01, SYNC-02, SYNC-03, COMP-01, COMP-02, COMP-03)
-- In Progress: 0
-- Pending: 9 (Phase 3)
+- In Progress: 1 (CREATE-01)
+- Pending: 8 (Phase 3)
 
 **Phases:**
 - Total: 3
 - Completed: 2
-- In Progress: 0
-- Pending: 1
+- In Progress: 1
+- Pending: 0
 
 **Plans:**
 - Total: 8 (across all phases)
-- Completed: 6
+- Completed: 7
 - In Progress: 0
-- Pending: 2
+- Pending: 1
 
-**Velocity:** 7 min/plan (6 data points: 16 + 11 + 3 + 2 + 2 + 8 = 42 min / 6 plans)
+**Velocity:** 7 min/plan (7 data points: 16 + 11 + 3 + 2 + 2 + 8 + 8 = 50 min / 7 plans)
 
 ---
 
@@ -111,6 +111,8 @@
 | HOME=/home/root in launcher env | Systemd services have minimal env; QSettings needs HOME to find config | Deploy | 2026-02-03 |
 | appController.quit() not Qt.quit() | Qt.quit() doesn't work on embedded; QCoreApplication::quit() via controller works | Deploy | 2026-02-03 |
 | BusyBox compat in launcher scripts | Device uses BusyBox; head -n 1 not head -1, /bin/sh not /bin/bash | Deploy | 2026-02-03 |
+| tempId for optimistic UI | SyncOperation.tempId tracks task before server assigns real ID | 03-01 | 2026-02-06 |
+| POST /tasks returns HTTP 200 | Todoist REST API v2 returns 200 with full task JSON, not 201 Created | 03-01 | 2026-02-06 |
 
 ### Open Questions
 
@@ -136,46 +138,38 @@ None
 - [x] Execute 02-02-PLAN.md (SyncQueue with JSON persistence)
 - [x] Execute 02-03-PLAN.md (SyncManager orchestration)
 - [x] Execute 02-04-PLAN.md (UI integration) - **PASSED: 18 tasks, completion synced to API**
+- [x] Execute 03-01-PLAN.md (Task creation backend) - **COMPLETE**
+- [ ] Execute 03-02-PLAN.md (Handwriting canvas)
+- [ ] Execute 03-03-PLAN.md (OCR integration)
+- [ ] Execute 03-04-PLAN.md (UI integration for task creation)
 
 ---
 
 ## Session Continuity
 
-**Last Session:** 2026-02-02 - Phase 2 Plan 04 completion
-**Stopped at:** Completed 02-04-PLAN.md (UI integration and visual verification)
+**Last Session:** 2026-02-06 - Phase 3 Plan 01 completion
+**Stopped at:** Completed 03-01-PLAN.md (Task creation backend)
 **Resume file:** None
 
 **Quick Context for Next Session:**
 - **Phase 1 complete:** App displays Todoist tasks on device
 - **Phase 2 complete:** Task completion with optimistic UI and background sync
-- **Phase 2 deployed and verified on device** (2026-02-03)
+- **Phase 3 in progress:** Task creation backend complete (Plan 01)
 - **Build:** Cross-compilation on arm64 host using `build-rm.sh` with device sysroot at `/tmp/rm-sysroot`
 - **Deploy:** `scp build-rm/remarkable-todoist root@10.11.99.1:/opt/bin/`
 - **Launcher:** Notebook-based launcher on stock firmware (minimal static inotifywait, 15s boot delay)
 
-**Phase 2 Complete:**
-- 02-01 - Task completion building blocks (Wave 1)
-  - TodoistClient.closeTask() - POST to /tasks/{id}/close with 204 No Content
-  - TaskModel.setTaskCompleted() - State update with dataChanged signal
-- 02-02 - SyncQueue with JSON persistence (Wave 1)
-  - Queue operations: enqueue, dequeue, peek, clear
-  - Persists to ~/.config/remarkable-todoist/sync_queue.json
-- 02-03 - SyncManager orchestration (Wave 2)
-  - Coordinates TodoistClient, SyncQueue, and connectivity state
-  - QNetworkInformation with error-based fallback
-  - Auto-sync on reconnect with 2 second delay
-  - Retry logic (max 5 attempts)
-- 02-04 - UI integration (Wave 3)
-  - AppController.completeTask() with optimistic update
-  - Sync status indicator in QML header
-  - TaskDelegate checkbox wired to completeTask()
-  - Verified: 18 tasks fetched, completion synced to Todoist API
+**Phase 3 Progress:**
+- 03-01 - Task creation backend (Wave 1) - **COMPLETE**
+  - TodoistClient.createTask() - POST to /rest/v2/tasks with JSON body
+  - SyncOperation extended with content and tempId fields
+  - SyncManager.queueTaskCreation() with same offline-first patterns
+  - taskCreateSynced/taskCreateSyncFailed signals for UI binding
 
 **Next Steps:**
-- Phase 3: Task Creation with Handwriting Input
-- Handwriting canvas for stylus input
-- OCR integration (MyScript or on-device)
-- Task creation API integration
+- Phase 3 Plan 02: Handwriting canvas for stylus input
+- Phase 3 Plan 03: OCR integration (MyScript or on-device)
+- Phase 3 Plan 04: Wire handwriting to task creation API
 
 ---
 
