@@ -14,6 +14,14 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2)
 set(QT_VERSION_MAJOR 6)
 message(STATUS "Using Qt6 Quick/QML")
 
+# Find Tesseract OCR (for handwriting recognition)
+# NOTE: For reMarkable cross-compilation, Tesseract .so files need to be in the sysroot.
+# The build-rm.sh script may need PKG_CONFIG_PATH pointed at the sysroot's pkgconfig.
+# For desktop development, install: libtesseract-dev libleptonica-dev tesseract-ocr-eng
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(TESSERACT REQUIRED tesseract)
+pkg_check_modules(LEPTONICA REQUIRED lept)
+
 # Collect source files (no widget views)
 set(SOURCES
     src/main.cpp
@@ -24,6 +32,7 @@ set(SOURCES
     src/network/todoist_client.cpp
     src/network/sync_manager.cpp
     src/controllers/appcontroller.cpp
+    src/ocr/handwriting_recognizer.cpp
 )
 
 # QML resources
@@ -32,7 +41,13 @@ qt_add_resources(QML_RESOURCES qml/qml.qrc)
 # Create executable
 add_executable(remarkable-todoist ${SOURCES} ${QML_RESOURCES})
 
-# Link Qt libraries
+# Include directories for Tesseract and Leptonica
+target_include_directories(remarkable-todoist PRIVATE
+    ${TESSERACT_INCLUDE_DIRS}
+    ${LEPTONICA_INCLUDE_DIRS}
+)
+
+# Link Qt libraries and Tesseract
 target_link_libraries(remarkable-todoist
     Qt6::Core
     Qt6::Gui
@@ -40,6 +55,8 @@ target_link_libraries(remarkable-todoist
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
+    ${TESSERACT_LIBRARIES}
+    ${LEPTONICA_LIBRARIES}
 )
 
 # Set output directory
