@@ -37,13 +37,25 @@ Item {
                 border.color: borderColor
                 border.width: 2
 
-                // Checkmark for completed tasks
-                Text {
+                // Checkmark drawn with Canvas (no font/Unicode dependency)
+                Canvas {
                     anchors.centerIn: parent
-                    text: model.completed ? "✓" : ""
-                    font.pixelSize: 36
-                    font.bold: true
-                    color: textColor
+                    width: 32
+                    height: 32
+                    visible: model.completed
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+                        ctx.strokeStyle = textColor
+                        ctx.lineWidth = 4
+                        ctx.lineCap = "round"
+                        ctx.lineJoin = "round"
+                        ctx.beginPath()
+                        ctx.moveTo(4, 16)
+                        ctx.lineTo(12, 26)
+                        ctx.lineTo(28, 4)
+                        ctx.stroke()
+                    }
                 }
 
                 MouseArea {
@@ -111,9 +123,9 @@ Item {
                         visible: (model.projectName !== "" || model.dueDate !== "") && model.priority > 1
                     }
 
-                    // Priority
+                    // Priority (API: 1=lowest..4=highest, Display: P1=highest..P4=lowest)
                     Text {
-                        text: "P" + model.priority
+                        text: "P" + (5 - model.priority)
                         font.pixelSize: 20
                         font.bold: true
                         color: {
